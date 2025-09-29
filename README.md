@@ -6,7 +6,7 @@ A pure Go implementation of lambda calculus with Church encoding, providing a fo
 
 This library implements the lambda calculus, a formal system for expressing computation based on function abstraction and application. It includes Church encodings for booleans, numbers, and common operations, demonstrating that complex computations can be built from simple lambda expressions.
 
-For an excellent introduction to lambda calculus, watch [A Flock of Functions](https://www.youtube.com/watch?v=RcVA8Nj6HEo).
+For an excellent introduction to lambda calculus, watch [What is PLUS times PLUS?](https://www.youtube.com/watch?v=RcVA8Nj6HEo).
 
 ## Installation
 
@@ -246,7 +246,7 @@ These simple constructs are Turing-complete, capable of expressing any computabl
 
 ## References
 
-- [A Flock of Functions - Lambda Calculus Explained](https://www.youtube.com/watch?v=RcVA8Nj6HEo)
+- [What is PLUS times PLUS? - Lambda Calculus Explained](https://www.youtube.com/watch?v=RcVA8Nj6HEo)
 - Church, A. (1936). "An Unsolvable Problem of Elementary Number Theory"
 - Barendregt, H. P. (1984). "The Lambda Calculus: Its Syntax and Semantics"
 
