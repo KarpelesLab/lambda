@@ -141,6 +141,27 @@ func (a Application) AlphaConvert(oldName, newName string) Object {
 	}
 }
 
+// Reduce performs multiple β-reductions up to a maximum number of steps.
+// It returns the reduced term and the number of reductions performed.
+// If limit is 0 or negative, a default limit of 1000 is used.
+func Reduce(obj Object, limit int) (Object, int) {
+	if limit <= 0 {
+		limit = 1000
+	}
+
+	steps := 0
+	for i := 0; i < limit; i++ {
+		reduced, didReduce := obj.BetaReduce()
+		if !didReduce {
+			break
+		}
+		obj = reduced
+		steps++
+	}
+
+	return obj, steps
+}
+
 // BetaReduce implementations
 func (v Var) BetaReduce() (Object, bool) {
 	return v, false

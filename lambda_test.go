@@ -319,6 +319,38 @@ func TestComplexBetaReduction(t *testing.T) {
 	}
 }
 
+func TestReduce(t *testing.T) {
+	// Test the Reduce helper function
+	// (λx.x) y should reduce to y in one step
+	term := Application{
+		Func: Abstraction{Param: "x", Body: Var{Name: "x"}},
+		Arg:  Var{Name: "y"},
+	}
+
+	result, steps := Reduce(term, 10)
+
+	if steps != 1 {
+		t.Errorf("Expected 1 reduction step, got %d", steps)
+	}
+
+	if result.String() != "y" {
+		t.Errorf("Expected 'y', got '%s'", result.String())
+	}
+
+	// Test with default limit (0 means use default 1000)
+	result, steps = Reduce(term, 0)
+	if steps != 1 {
+		t.Errorf("Expected 1 reduction step with default limit, got %d", steps)
+	}
+
+	// Test with no reduction possible
+	v := Var{Name: "x"}
+	result, steps = Reduce(v, 10)
+	if steps != 0 {
+		t.Errorf("Expected 0 reduction steps for variable, got %d", steps)
+	}
+}
+
 func TestFreshVar(t *testing.T) {
 	avoid := map[string]bool{"x": true, "x0": true, "x1": true}
 	fresh := freshVar("x", avoid)
@@ -362,13 +394,7 @@ func TestMult(t *testing.T) {
 	}
 
 	// Reduce the result
-	for i := 0; i < 100; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 100)
 
 	resultInt := ToInt(result)
 	if resultInt != 6 {
@@ -389,13 +415,7 @@ func TestFactorial(t *testing.T) {
 	// We need to reduce this, but factorial involves the Y combinator
 	// which can create infinite expansion. We'll limit reductions.
 	// For factorial(3), we need enough reductions to compute the result.
-	for i := 0; i < 1000; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 1000)
 
 	resultInt := ToInt(result)
 	if resultInt != 6 {
@@ -415,13 +435,7 @@ func TestFAC(t *testing.T) {
 	}
 
 	// Reduce
-	for i := 0; i < 1000; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 1000)
 
 	resultInt := ToInt(result)
 	if resultInt != 6 {
@@ -458,13 +472,7 @@ func TestFIB(t *testing.T) {
 		}
 
 		// Reduce
-		for i := 0; i < 2000; i++ {
-			reduced, didReduce := result.BetaReduce()
-			if !didReduce {
-				break
-			}
-			result = reduced
-		}
+		result, _ = Reduce(result, 2000)
 
 		resultInt := ToInt(result)
 		if resultInt != tt.expected {

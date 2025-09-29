@@ -61,13 +61,7 @@ func TestCombinatorS(t *testing.T) {
 	var result Object = Application{Func: skk, Arg: x}
 
 	// Reduce multiple times
-	for i := 0; i < 10; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 10)
 
 	if result.String() != "x" {
 		t.Errorf("Expected S K K x = x, got '%s'", result.String())
@@ -90,13 +84,7 @@ func TestCombinatorB(t *testing.T) {
 	}
 
 	// Reduce
-	for i := 0; i < 10; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 10)
 
 	// Should be f (g x)
 	if result.String() != "f (g x)" {
@@ -119,13 +107,7 @@ func TestCombinatorC(t *testing.T) {
 	}
 
 	// Reduce
-	for i := 0; i < 10; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 10)
 
 	// Should be f y x
 	if result.String() != "f y x" {
@@ -144,13 +126,7 @@ func TestCombinatorW(t *testing.T) {
 	}
 
 	// Reduce
-	for i := 0; i < 10; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	result, _ = Reduce(result, 10)
 
 	// Should be f x x
 	if result.String() != "f x x" {
