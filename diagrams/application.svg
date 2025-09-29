@@ -2,7 +2,9 @@
 <style>line{stroke:black;stroke-width:2;stroke-linecap:round;}text{font-family:monospace;font-size:14px;}</style>
 <line x1="20" y1="30" x2="40" y2="30"/>
 <line x1="40" y1="30" x2="60" y2="30"/>
+<line x1="50" y1="30" x2="50" y2="40"/>
 <line x1="60" y1="30" x2="80" y2="30"/>
+<line x1="80" y1="30" x2="100" y2="30"/>
 <line x1="90" y1="20" x2="90" y2="40"/>
 <line x1="50" y1="40" x2="50" y2="60"/>
 <line x1="90" y1="40" x2="90" y2="60"/>

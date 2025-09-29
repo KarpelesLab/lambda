@@ -170,9 +170,9 @@ func drawCornerSVG(sb *strings.Builder, ch rune, x, y, cellWidth, cellHeight int
 
 // DiagramContext tracks variable positions during diagram generation
 type DiagramContext struct {
-	VarPositions map[string][]int // Maps variable names to their column positions
-	CurrentDepth int              // Current abstraction depth
-	CurrentCol   int              // Current column position
+	VarPositions map[string]int // Maps variable names to their lambda row
+	CurrentDepth int            // Current abstraction depth
+	CurrentCol   int            // Current column position
 }
 
 // ToDiagram converts a lambda calculus term to a diagram
@@ -186,13 +186,13 @@ func ToDiagram(obj Object) *Diagram {
 
 	diagram := NewDiagram(width, height)
 	ctx := &DiagramContext{
-		VarPositions: make(map[string][]int),
+		VarPositions: make(map[string]int),
 		CurrentDepth: 1,
 		CurrentCol:   1,
 	}
 
 	// Second pass: draw the diagram
-	drawObject(diagram, obj, ctx, 1)
+	drawObject(diagram, obj, ctx, 1, make(map[string]int))
 
 	return diagram
 }
@@ -229,40 +229,57 @@ func calculateDimensions(obj Object, depth int) (width, height int) {
 }
 
 // drawObject draws a lambda calculus object into the diagram
-func drawObject(d *Diagram, obj Object, ctx *DiagramContext, row int) int {
+// lambdaRows maps variable names to the row of their binding lambda
+func drawObject(d *Diagram, obj Object, ctx *DiagramContext, row int, lambdaRows map[string]int) int {
 	switch term := obj.(type) {
 	case Var:
 		// Draw a vertical line for the variable
 		col := ctx.CurrentCol
 		ctx.CurrentCol += 2
 
-		// Draw vertical line down from binding lambda
-		for r := row; r < d.Height-1; r++ {
-			d.Set(r, col, '│')
+		// Draw vertical line from binding lambda down to current row
+		if lambdaRow, ok := lambdaRows[term.Name]; ok {
+			// Connect from the lambda line down to current position
+			for r := lambdaRow; r <= row; r++ {
+				existing := d.Get(r, col)
+				if existing == '─' {
+					// Intersection with horizontal line
+					d.Set(r, col, '┬')
+				} else if existing == ' ' {
+					d.Set(r, col, '│')
+				}
+			}
+		} else {
+			// Free variable - just draw a vertical line down
+			for r := row; r < d.Height-1; r++ {
+				d.Set(r, col, '│')
+			}
 		}
-
-		// Store variable position
-		if ctx.VarPositions[term.Name] == nil {
-			ctx.VarPositions[term.Name] = []int{}
-		}
-		ctx.VarPositions[term.Name] = append(ctx.VarPositions[term.Name], col)
 
 		return col
 
 	case Abstraction:
 		// Draw horizontal line for abstraction
 		startCol := ctx.CurrentCol
+		endCol := startCol + 3
 
 		// Draw the lambda line
-		for c := startCol; c < startCol+4 && c < d.Width; c++ {
+		for c := startCol; c <= endCol && c < d.Width; c++ {
 			d.Set(row, c, '─')
 		}
+
+		// Add this variable's binding to the map
+		newLambdaRows := make(map[string]int)
+		for k, v := range lambdaRows {
+			newLambdaRows[k] = v
+		}
+		newLambdaRows[term.Param] = row
 
 		ctx.CurrentCol = startCol + 1
 		ctx.CurrentDepth++
 
 		// Draw the body
-		drawObject(d, term.Body, ctx, row+1)
+		drawObject(d, term.Body, ctx, row+1, newLambdaRows)
 
 		ctx.CurrentDepth--
 
@@ -270,14 +287,18 @@ func drawObject(d *Diagram, obj Object, ctx *DiagramContext, row int) int {
 
 	case Application:
 		// Draw function and argument
-		funcCol := drawObject(d, term.Func, ctx, row)
-		argCol := drawObject(d, term.Arg, ctx, row)
+		funcCol := drawObject(d, term.Func, ctx, row, lambdaRows)
+		argCol := drawObject(d, term.Arg, ctx, row, lambdaRows)
 
 		// Draw horizontal link connecting them
 		if funcCol < argCol {
 			for c := funcCol; c <= argCol; c++ {
-				if d.Get(row, c) == ' ' {
+				existing := d.Get(row, c)
+				if existing == ' ' {
 					d.Set(row, c, '─')
+				} else if existing == '│' {
+					// Intersection with vertical line
+					d.Set(row, c, '┼')
 				}
 			}
 		}
