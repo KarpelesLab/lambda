@@ -429,3 +429,47 @@ func TestFAC(t *testing.T) {
 		t.Logf("Result term: %s", result.String())
 	}
 }
+
+func TestFIB(t *testing.T) {
+	// Test Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, ...
+	tests := []struct {
+		n        int
+		expected int
+	}{
+		{0, 0},
+		{1, 1},
+		{2, 1},
+		{3, 2},
+		{4, 3},
+		{5, 5},
+		{6, 8},
+	}
+
+	for _, tt := range tests {
+		n := ChurchNumeral(tt.n)
+
+		// Apply FIB to n and SUCC (since FIB returns λf....)
+		var result Object = Application{
+			Func: Application{
+				Func: FIB,
+				Arg:  n,
+			},
+			Arg: Var{Name: "SUCC_MARKER"},
+		}
+
+		// Reduce
+		for i := 0; i < 2000; i++ {
+			reduced, didReduce := result.BetaReduce()
+			if !didReduce {
+				break
+			}
+			result = reduced
+		}
+
+		resultInt := ToInt(result)
+		if resultInt != tt.expected {
+			t.Errorf("Expected FIB(%d) = %d, got %d", tt.n, tt.expected, resultInt)
+			t.Logf("Result term: %s", result.String())
+		}
+	}
+}

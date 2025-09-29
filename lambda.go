@@ -688,6 +688,58 @@ var FAC = Abstraction{
 	},
 }
 
+// FIB is a Fibonacci implementation without Y combinator
+// FIB = λn.λf.n(λc.λa.λb.c b(λx.a (b x)))(λx.λy.x)(λx.x)f
+var FIB = Abstraction{
+	Param: "n",
+	Body: Abstraction{
+		Param: "f",
+		Body: Application{
+			Func: Application{
+				Func: Application{
+					Func: Var{Name: "n"},
+					Arg: Abstraction{
+						Param: "c",
+						Body: Abstraction{
+							Param: "a",
+							Body: Abstraction{
+								Param: "b",
+								Body: Application{
+									Func: Application{
+										Func: Var{Name: "c"},
+										Arg:  Var{Name: "b"},
+									},
+									Arg: Abstraction{
+										Param: "x",
+										Body: Application{
+											Func: Var{Name: "a"},
+											Arg: Application{
+												Func: Var{Name: "b"},
+												Arg:  Var{Name: "x"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				Arg: Abstraction{
+					Param: "x",
+					Body: Abstraction{
+						Param: "y",
+						Body: Var{Name: "x"},
+					},
+				},
+			},
+			Arg: Abstraction{
+				Param: "x",
+				Body: Var{Name: "x"},
+			},
+		},
+	},
+}
+
 // ToInt converts a Church numeral to a Go integer by applying it to increment and 0
 func ToInt(term Object) int {
 	// Reduce the term as much as possible first
