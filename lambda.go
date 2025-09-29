@@ -636,6 +636,58 @@ var FACTORIAL = Application{
 	},
 }
 
+// FAC is an alternative factorial implementation without Y combinator
+// FAC = λn.λf.n(λf.λn.n(f(λf.λx.n f(f x))))(λx.f)(λx.x)
+var FAC = Abstraction{
+	Param: "n",
+	Body: Abstraction{
+		Param: "f",
+		Body: Application{
+			Func: Application{
+				Func: Application{
+					Func: Var{Name: "n"},
+					Arg: Abstraction{
+						Param: "f",
+						Body: Abstraction{
+							Param: "n",
+							Body: Application{
+								Func: Var{Name: "n"},
+								Arg: Application{
+									Func: Var{Name: "f"},
+									Arg: Abstraction{
+										Param: "f",
+										Body: Abstraction{
+											Param: "x",
+											Body: Application{
+												Func: Application{
+													Func: Var{Name: "n"},
+													Arg:  Var{Name: "f"},
+												},
+												Arg: Application{
+													Func: Var{Name: "f"},
+													Arg:  Var{Name: "x"},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				Arg: Abstraction{
+					Param: "x",
+					Body:  Var{Name: "f"},
+				},
+			},
+			Arg: Abstraction{
+				Param: "x",
+				Body:  Var{Name: "x"},
+			},
+		},
+	},
+}
+
 // ToInt converts a Church numeral to a Go integer by applying it to increment and 0
 func ToInt(term Object) int {
 	// Reduce the term as much as possible first

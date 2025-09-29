@@ -403,3 +403,29 @@ func TestFactorial(t *testing.T) {
 		t.Logf("Result term: %s", result.String())
 	}
 }
+
+func TestFAC(t *testing.T) {
+	// Test FAC 3 = 6 using alternative factorial implementation
+	three := ChurchNumeral(3)
+
+	// Apply FAC to 3
+	var result Object = Application{
+		Func: FAC,
+		Arg:  three,
+	}
+
+	// Reduce
+	for i := 0; i < 1000; i++ {
+		reduced, didReduce := result.BetaReduce()
+		if !didReduce {
+			break
+		}
+		result = reduced
+	}
+
+	resultInt := ToInt(result)
+	if resultInt != 6 {
+		t.Errorf("Expected FAC(3) = 6, got %d", resultInt)
+		t.Logf("Result term: %s", result.String())
+	}
+}
