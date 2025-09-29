@@ -260,10 +260,26 @@ func ChurchNumeral(n int) Object {
 	}
 }
 
-// Boolean constants
+// Standard combinators
+//
+// I is the identity function.
+//
+// SK and BCKW form complete combinator calculus systems that can express any lambda term.
+// This means that any lambda calculus expression can be translated into an equivalent expression
+// using only these combinators.
+//
+// Ω is UU (or ω ω), the smallest term that has no normal form - it reduces to itself infinitely.
+// YI is another such term with no normal form.
 var (
-	// TRUE := λx.λy.x
-	TRUE = Abstraction{
+	// I := λx.x (Identity function)
+	I = Abstraction{
+		Param: "x",
+		Body:  Var{Name: "x"},
+	}
+
+	// K := λx.λy.x (Constant/Cancel)
+	// Together with S, forms a complete combinator calculus basis (SK calculus)
+	K = Abstraction{
 		Param: "x",
 		Body: Abstraction{
 			Param: "y",
@@ -271,7 +287,117 @@ var (
 		},
 	}
 
+	// S := λx.λy.λz.x z (y z) (Substitution)
+	// Together with K, forms a complete combinator calculus basis (SK calculus)
+	S = Abstraction{
+		Param: "x",
+		Body: Abstraction{
+			Param: "y",
+			Body: Abstraction{
+				Param: "z",
+				Body: Application{
+					Func: Application{
+						Func: Var{Name: "x"},
+						Arg:  Var{Name: "z"},
+					},
+					Arg: Application{
+						Func: Var{Name: "y"},
+						Arg:  Var{Name: "z"},
+					},
+				},
+			},
+		},
+	}
+
+	// B := λx.λy.λz.x (y z) (Composition)
+	// Together with C, K, and W, forms a complete combinator calculus basis (BCKW calculus)
+	B = Abstraction{
+		Param: "x",
+		Body: Abstraction{
+			Param: "y",
+			Body: Abstraction{
+				Param: "z",
+				Body: Application{
+					Func: Var{Name: "x"},
+					Arg: Application{
+						Func: Var{Name: "y"},
+						Arg:  Var{Name: "z"},
+					},
+				},
+			},
+		},
+	}
+
+	// C := λx.λy.λz.x z y (Flip)
+	// Together with B, K, and W, forms a complete combinator calculus basis (BCKW calculus)
+	C = Abstraction{
+		Param: "x",
+		Body: Abstraction{
+			Param: "y",
+			Body: Abstraction{
+				Param: "z",
+				Body: Application{
+					Func: Application{
+						Func: Var{Name: "x"},
+						Arg:  Var{Name: "z"},
+					},
+					Arg: Var{Name: "y"},
+				},
+			},
+		},
+	}
+
+	// W := λx.λy.x y y (Warbler/Duplication)
+	// Together with B, C, and K, forms a complete combinator calculus basis (BCKW calculus)
+	W = Abstraction{
+		Param: "x",
+		Body: Abstraction{
+			Param: "y",
+			Body: Application{
+				Func: Application{
+					Func: Var{Name: "x"},
+					Arg:  Var{Name: "y"},
+				},
+				Arg: Var{Name: "y"},
+			},
+		},
+	}
+
+	// U := λx.x x (Self-application)
+	// Also known as ω (omega) or Δ (delta)
+	U = Abstraction{
+		Param: "x",
+		Body: Application{
+			Func: Var{Name: "x"},
+			Arg:  Var{Name: "x"},
+		},
+	}
+
+	// Ω (Omega) := U U (or ω ω)
+	// The smallest term that has no normal form - it reduces to itself infinitely
+	// Another example of a term with no normal form is Y I
+	OMEGA = Application{
+		Func: U,
+		Arg:  U,
+	}
+)
+
+// Aliases for combinators
+var (
+	OMEGA_LOWER = U     // ω := λx.x x (same as U)
+	DELTA       = U     // δ := λx.x x (same as U)
+)
+
+// Boolean constants
+//
+// TRUE and FALSE are commonly abbreviated as T and F.
+var (
+	// TRUE := λx.λy.x (same as K combinator)
+	// Commonly abbreviated as T
+	TRUE = K
+
 	// FALSE := λx.λy.y
+	// Commonly abbreviated as F
 	FALSE = Abstraction{
 		Param: "x",
 		Body: Abstraction{
@@ -279,6 +405,12 @@ var (
 			Body:  Var{Name: "y"},
 		},
 	}
+
+	// T is an alias for TRUE
+	T = TRUE
+
+	// F is an alias for FALSE
+	F = FALSE
 )
 
 // Boolean operations
@@ -576,7 +708,14 @@ var (
 )
 
 // Y combinator for recursion
+//
 // Y := λf.(λx.f (x x)) (λx.f (x x))
+//
+// The Y combinator enables recursion in lambda calculus.
+// It satisfies the property: Y g = g (Y g)
+//
+// Alternative definition: Y = B U (C B U)
+// This alternative shows Y in terms of B, C, and U combinators.
 var Y = Abstraction{
 	Param: "f",
 	Body: Application{
