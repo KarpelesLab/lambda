@@ -260,6 +260,18 @@ var (
 		Arg:  ZERO,
 	}
 
+	// TWO := SUCC ONE (Church numeral 2)
+	TWO = Application{
+		Func: SUCC,
+		Arg:  ONE,
+	}
+
+	// DEC := PRED (decrement, alias for predecessor)
+	DEC = PRED
+
+	// ADD := PLUS (addition, alias)
+	ADD = PLUS
+
 	// PLUS := λm.λn.λf.λx.m f (n f x)
 	PLUS = Abstraction{
 		Param: "m",
@@ -385,7 +397,121 @@ var (
 			},
 		},
 	}
+
+	// EQ := λm.λn.AND (LEQ m n) (LEQ n m)
+	EQ = Abstraction{
+		Param: "m",
+		Body: Abstraction{
+			Param: "n",
+			Body: Application{
+				Func: Application{
+					Func: AND,
+					Arg: Application{
+						Func: Application{
+							Func: LEQ,
+							Arg:  Var{Name: "m"},
+						},
+						Arg: Var{Name: "n"},
+					},
+				},
+				Arg: Application{
+					Func: Application{
+						Func: LEQ,
+						Arg:  Var{Name: "n"},
+					},
+					Arg: Var{Name: "m"},
+				},
+			},
+		},
+	}
+
+	// MAX := λa.λb.IF (LEQ a b) b a
+	MAX = Abstraction{
+		Param: "a",
+		Body: Abstraction{
+			Param: "b",
+			Body: Application{
+				Func: Application{
+					Func: Application{
+						Func: IF,
+						Arg: Application{
+							Func: Application{
+								Func: LEQ,
+								Arg:  Var{Name: "a"},
+							},
+							Arg: Var{Name: "b"},
+						},
+					},
+					Arg: Var{Name: "b"},
+				},
+				Arg: Var{Name: "a"},
+			},
+		},
+	}
+
+	// MIN := λa.λb.IF (LEQ a b) a b
+	MIN = Abstraction{
+		Param: "a",
+		Body: Abstraction{
+			Param: "b",
+			Body: Application{
+				Func: Application{
+					Func: Application{
+						Func: IF,
+						Arg: Application{
+							Func: Application{
+								Func: LEQ,
+								Arg:  Var{Name: "a"},
+							},
+							Arg: Var{Name: "b"},
+						},
+					},
+					Arg: Var{Name: "a"},
+				},
+				Arg: Var{Name: "b"},
+			},
+		},
+	}
 )
+
+// GCD := Y (λrec.λa.λb.IF (ISZERO b) a (rec b (MOD a b)))
+var GCD = Application{
+	Func: Y,
+	Arg: Abstraction{
+		Param: "rec",
+		Body: Abstraction{
+			Param: "a",
+			Body: Abstraction{
+				Param: "b",
+				Body: Application{
+					Func: Application{
+						Func: Application{
+							Func: IF,
+							Arg: Application{
+								Func: ISZERO,
+								Arg:  Var{Name: "b"},
+							},
+						},
+						Arg: Var{Name: "a"},
+					},
+					Arg: Application{
+						Func: Application{
+							Func: Var{Name: "rec"},
+							Arg:  Var{Name: "b"},
+						},
+						Arg: Application{
+							Func: Application{
+								Func: MOD,
+								Arg:  Var{Name: "a"},
+							},
+							Arg: Var{Name: "b"},
+						},
+					},
+				},
+			},
+		},
+	},
+}
 
 // MOD := Y (λrec.λm.λn.(ISZERO n) ZERO ((LT m n) m (rec (SUB m n) n)))
 // Modulo operation with zero-divisor guard: m mod n = 0 if n = 0
