@@ -503,3 +503,99 @@ func TestFIB(t *testing.T) {
 		}
 	}
 }
+
+func TestToBool(t *testing.T) {
+	// Test TRUE
+	if !ToBool(TRUE) {
+		t.Error("Expected TRUE to convert to true")
+	}
+
+	// Test FALSE
+	if ToBool(FALSE) {
+		t.Error("Expected FALSE to convert to false")
+	}
+}
+
+func TestAND(t *testing.T) {
+	tests := []struct {
+		a        Object
+		b        Object
+		expected bool
+		name     string
+	}{
+		{TRUE, TRUE, true, "TRUE AND TRUE"},
+		{TRUE, FALSE, false, "TRUE AND FALSE"},
+		{FALSE, TRUE, false, "FALSE AND TRUE"},
+		{FALSE, FALSE, false, "FALSE AND FALSE"},
+	}
+
+	for _, tt := range tests {
+		var result Object = Application{
+			Func: Application{
+				Func: AND,
+				Arg:  tt.a,
+			},
+			Arg: tt.b,
+		}
+
+		result, _ = Reduce(result, 100)
+		resultBool := ToBool(result)
+
+		if resultBool != tt.expected {
+			t.Errorf("%s: expected %v, got %v", tt.name, tt.expected, resultBool)
+		}
+	}
+}
+
+func TestOR(t *testing.T) {
+	tests := []struct {
+		a        Object
+		b        Object
+		expected bool
+		name     string
+	}{
+		{TRUE, TRUE, true, "TRUE OR TRUE"},
+		{TRUE, FALSE, true, "TRUE OR FALSE"},
+		{FALSE, TRUE, true, "FALSE OR TRUE"},
+		{FALSE, FALSE, false, "FALSE OR FALSE"},
+	}
+
+	for _, tt := range tests {
+		var result Object = Application{
+			Func: Application{
+				Func: OR,
+				Arg:  tt.a,
+			},
+			Arg: tt.b,
+		}
+
+		result, _ = Reduce(result, 100)
+		resultBool := ToBool(result)
+
+		if resultBool != tt.expected {
+			t.Errorf("%s: expected %v, got %v", tt.name, tt.expected, resultBool)
+		}
+	}
+}
+
+func TestNOT(t *testing.T) {
+	// NOT TRUE = FALSE
+	var result Object = Application{
+		Func: NOT,
+		Arg:  TRUE,
+	}
+	result, _ = Reduce(result, 100)
+	if ToBool(result) {
+		t.Error("Expected NOT TRUE to be false")
+	}
+
+	// NOT FALSE = TRUE
+	result = Application{
+		Func: NOT,
+		Arg:  FALSE,
+	}
+	result, _ = Reduce(result, 100)
+	if !ToBool(result) {
+		t.Error("Expected NOT FALSE to be true")
+	}
+}

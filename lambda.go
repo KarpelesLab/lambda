@@ -956,6 +956,51 @@ func ToInt(term Object) int {
 	return count
 }
 
+// ToBool converts a Church boolean to a Go bool
+// TRUE returns true, FALSE returns false
+func ToBool(term Object) bool {
+	// Reduce the term as much as possible first
+	for {
+		reduced, didReduce := term.BetaReduce()
+		if !didReduce {
+			break
+		}
+		term = reduced
+	}
+
+	// Apply the boolean to two distinct markers
+	// TRUE will return the first argument, FALSE will return the second
+	var result Object = Application{
+		Func: Application{
+			Func: term,
+			Arg:  Var{Name: "TRUE_MARKER"},
+		},
+		Arg: Var{Name: "FALSE_MARKER"},
+	}
+
+	// Reduce completely
+	for i := 0; i < 1000; i++ {
+		reduced, didReduce := result.BetaReduce()
+		if !didReduce {
+			break
+		}
+		result = reduced
+	}
+
+	// Check which marker we got
+	if v, ok := result.(Var); ok {
+		if v.Name == "TRUE_MARKER" {
+			return true
+		}
+		if v.Name == "FALSE_MARKER" {
+			return false
+		}
+	}
+
+	// Default to false if we can't determine
+	return false
+}
+
 // Helper function to count nested applications of a specific function
 func countApplications(term Object, funcName string) int {
 	switch t := term.(type) {
