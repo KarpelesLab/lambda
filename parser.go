@@ -154,10 +154,17 @@ func (p *Parser) parseTerm() (Object, error) {
 		return p.parseAbstraction()
 	}
 
-	// Parse variable
+	// Parse variable or constant
 	name := p.parseIdentifier()
 	if name == "" {
 		return nil, fmt.Errorf("expected variable or '(' at position %d", p.pos)
+	}
+
+	// Check if it's a constant (starts with underscore)
+	if len(name) > 0 && name[0] == '_' {
+		if obj, ok := lookupConstant(name); ok {
+			return obj, nil
+		}
 	}
 
 	return Var{Name: name}, nil
@@ -217,4 +224,73 @@ func (p *Parser) peekRune() rune {
 		return 'λ'
 	}
 	return rune(p.input[p.pos])
+}
+
+// lookupConstant looks up a constant by name and returns its value
+// Supports digit constants (_0, _1, _2, ...) and defined constants
+func lookupConstant(name string) (Object, bool) {
+	// Check for digit constants (_0, _1, _2, ...)
+	if len(name) >= 2 && name[0] == '_' {
+		isDigit := true
+		for i := 1; i < len(name); i++ {
+			if name[i] < '0' || name[i] > '9' {
+				isDigit = false
+				break
+			}
+		}
+		if isDigit {
+			// Parse the digit and return Church numeral
+			num := 0
+			for i := 1; i < len(name); i++ {
+				num = num*10 + int(name[i]-'0')
+			}
+			return ChurchNumeral(num), true
+		}
+	}
+
+	// Check for defined constants
+	constants := map[string]Object{
+		"_I":          I,
+		"_K":          K,
+		"_S":          S,
+		"_B":          B,
+		"_C":          C,
+		"_W":          W,
+		"_U":          U,
+		"_OMEGA":      OMEGA,
+		"_OMEGA_LOWER": OMEGA_LOWER,
+		"_DELTA":      DELTA,
+		"_TRUE":       TRUE,
+		"_FALSE":      FALSE,
+		"_T":          T,
+		"_F":          F,
+		"_AND":        AND,
+		"_OR":         OR,
+		"_NOT":        NOT,
+		"_IFTHENELSE": IFTHENELSE,
+		"_SUCC":       SUCC,
+		"_PLUS":       PLUS,
+		"_SUB":        SUB,
+		"_MULT":       MULT,
+		"_POW":        POW,
+		"_ISZERO":     ISZERO,
+		"_LEQ":        LEQ,
+		"_PAIR":       PAIR,
+		"_FIRST":      FIRST,
+		"_SECOND":     SECOND,
+		"_PHI":        PHI,
+		"_PRED":       PRED,
+		"_NIL":        NIL,
+		"_NULL":       NULL,
+		"_Y":          Y,
+		"_FACTORIAL":  FACTORIAL,
+		"_FAC":        FAC,
+		"_FIB":        FIB,
+	}
+
+	if obj, ok := constants[name]; ok {
+		return obj, true
+	}
+
+	return nil, false
 }
