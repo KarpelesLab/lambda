@@ -134,3 +134,43 @@ func TestPOWMOD(t *testing.T) {
 		})
 	}
 }
+
+func TestPOWMOD_PRIME(t *testing.T) {
+	tests := []struct {
+		a, e, m int
+		want    int
+	}{
+		{2, 0, 5, 1},     // 2^0 mod 5 = 1
+		{2, 1, 5, 2},     // 2^1 mod 5 = 2
+		{2, 2, 5, 4},     // 2^2 mod 5 = 4
+		{3, 2, 7, 2},     // 3^2 mod 7 = 9 mod 7 = 2
+		{2, 3, 5, 3},     // 2^3 mod 5 = 8 mod 5 = 3
+	}
+
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			// POWMOD_PRIME takes 4 args: a, e, m, r (where r is the accumulator, initially 1)
+			result := Application{
+				Func: Application{
+					Func: Application{
+						Func: Application{
+							Func: POWMOD_PRIME,
+							Arg:  ChurchNumeral(tt.a),
+						},
+						Arg: ChurchNumeral(tt.e),
+					},
+					Arg: ChurchNumeral(tt.m),
+				},
+				Arg: ONE, // Initial accumulator
+			}
+
+			reduced, steps := Reduce(result, 20000)
+			got := ToInt(reduced)
+			t.Logf("POWMOD_PRIME %d %d %d = %d (want %d) in %d steps", tt.a, tt.e, tt.m, got, tt.want, steps)
+
+			if got != tt.want {
+				t.Errorf("POWMOD_PRIME %d %d %d = %d, want %d", tt.a, tt.e, tt.m, got, tt.want)
+			}
+		})
+	}
+}

@@ -575,6 +575,136 @@ var (
 // Note: MUL is already defined above as MULT, but we need it for POWMOD
 var MUL = MULT
 
+// POWMOD' := Y (λrec.λa.λe.λm.λr.IF (ISZERO e) (IF (ISZERO m) r (MOD r m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m r) (rec (MOD (MUL a a) m) (DIV2 e) m (MOD (MUL r a) m))))
+// Tail-recursive modular exponentiation with accumulator
+var POWMOD_PRIME = Application{
+	Func: Y,
+	Arg: Abstraction{
+		Param: "rec",
+		Body: Abstraction{
+			Param: "a",
+			Body: Abstraction{
+				Param: "e",
+				Body: Abstraction{
+					Param: "m",
+					Body: Abstraction{
+						Param: "r",
+						Body: Application{
+							Func: Application{
+								Func: Application{
+									Func: IF,
+									Arg: Application{
+										Func: ISZERO,
+										Arg:  Var{Name: "e"},
+									},
+								},
+								Arg: Application{
+									Func: Application{
+										Func: Application{
+											Func: IF,
+											Arg: Application{
+												Func: ISZERO,
+												Arg:  Var{Name: "m"},
+											},
+										},
+										Arg: Var{Name: "r"},
+									},
+									Arg: Application{
+										Func: Application{
+											Func: MOD,
+											Arg:  Var{Name: "r"},
+										},
+										Arg: Var{Name: "m"},
+									},
+								},
+							},
+							Arg: Application{
+								Func: Application{
+									Func: Application{
+										Func: IF,
+										Arg: Application{
+											Func: ISEVEN,
+											Arg:  Var{Name: "e"},
+										},
+									},
+									Arg: Application{
+										Func: Application{
+											Func: Application{
+												Func: Application{
+													Func: Var{Name: "rec"},
+													Arg: Application{
+														Func: Application{
+															Func: MOD,
+															Arg: Application{
+																Func: Application{
+																	Func: MUL,
+																	Arg:  Var{Name: "a"},
+																},
+																Arg: Var{Name: "a"},
+															},
+														},
+														Arg: Var{Name: "m"},
+													},
+												},
+												Arg: Application{
+													Func: DIV2,
+													Arg:  Var{Name: "e"},
+												},
+											},
+											Arg: Var{Name: "m"},
+										},
+										Arg: Var{Name: "r"},
+									},
+								},
+								Arg: Application{
+									Func: Application{
+										Func: Application{
+											Func: Application{
+												Func: Var{Name: "rec"},
+												Arg: Application{
+													Func: Application{
+														Func: MOD,
+														Arg: Application{
+															Func: Application{
+																Func: MUL,
+																Arg:  Var{Name: "a"},
+															},
+															Arg: Var{Name: "a"},
+														},
+													},
+													Arg: Var{Name: "m"},
+												},
+											},
+											Arg: Application{
+												Func: DIV2,
+												Arg:  Var{Name: "e"},
+											},
+										},
+										Arg: Var{Name: "m"},
+									},
+									Arg: Application{
+										Func: Application{
+											Func: MOD,
+											Arg: Application{
+												Func: Application{
+													Func: MUL,
+													Arg:  Var{Name: "r"},
+												},
+												Arg: Var{Name: "a"},
+											},
+										},
+										Arg: Var{Name: "m"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 // POWMOD := Y (λrec.λa.λe.λm.IF (ISZERO e) (IF (ISZERO m) ONE (MOD ONE m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m) (MOD (MUL a (rec (MOD (MUL a a) m) (DIV2 e) m)) m)))
 var POWMOD = Application{
 	Func: Y,

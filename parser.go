@@ -292,6 +292,7 @@ func lookupConstant(name string) (Object, bool) {
 		"_ISEVEN":     ISEVEN,
 		"_MUL":        MUL,
 		"_POWMOD":     POWMOD,
+		"_POWMOD_PRIME": POWMOD_PRIME,
 		"_NIL":        NIL,
 		"_NULL":       NULL,
 		"_Y":          Y,
