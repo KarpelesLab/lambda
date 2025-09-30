@@ -17,6 +17,8 @@ func TestParseDigitConstants(t *testing.T) {
 		{"_10", 10},
 		{"_42", 42},
 		{"_100", 100},
+		{"_ZERO", 0},
+		{"_ONE", 1},
 	}
 
 	for _, tt := range tests {

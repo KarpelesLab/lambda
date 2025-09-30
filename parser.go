@@ -269,6 +269,8 @@ func lookupConstant(name string) (Object, bool) {
 		"_NOT":        NOT,
 		"_IF":         IF,
 		"_IFTHENELSE": IFTHENELSE,
+		"_ZERO":       ZERO,
+		"_ONE":        ONE,
 		"_SUCC":       SUCC,
 		"_PLUS":       PLUS,
 		"_SUB":        SUB,

@@ -224,6 +224,15 @@ var (
 
 // Arithmetic operations
 var (
+	// ZERO := λf.λx.x (Church numeral 0)
+	ZERO = Abstraction{
+		Param: "f",
+		Body: Abstraction{
+			Param: "x",
+			Body:  Var{Name: "x"},
+		},
+	}
+
 	// SUCC := λn.λf.λx.f (n f x)
 	SUCC = Abstraction{
 		Param: "n",
@@ -243,6 +252,12 @@ var (
 				},
 			},
 		},
+	}
+
+	// ONE := SUCC ZERO (Church numeral 1)
+	ONE = Application{
+		Func: SUCC,
+		Arg:  ZERO,
 	}
 
 	// PLUS := λm.λn.λf.λx.m f (n f x)
