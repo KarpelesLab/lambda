@@ -913,79 +913,42 @@ var FIB = Abstraction{
 }
 
 // ToInt converts a Church numeral to a Go integer by applying it to increment and 0
+// Church numeral n = λf.λx.f^n x, so we apply it to a marker function and count applications
 func ToInt(term Object) int {
-	// Reduce the term as much as possible first
-	for {
-		reduced, didReduce := term.BetaReduce()
-		if !didReduce {
-			break
-		}
-		term = reduced
-	}
-
 	// Apply the Church numeral to an increment function and 0
-	// We'll track how many times the function is called
-	count := 0
-
-	// Create a simple evaluator that counts applications
 	// Church numeral n applied to f and 0 will call f n times
 	// We'll use a marker to count
-
-	// Apply to a successor-like function: λx.x+1
-	// We'll represent numbers as nested applications of a marker
-	var result Object = Application{
+	result := Object(Application{
 		Func: Application{
 			Func: term,
 			Arg:  Var{Name: "SUCC_MARKER"},
 		},
 		Arg: Var{Name: "ZERO_MARKER"},
-	}
+	})
 
-	// Reduce completely
-	for i := 0; i < 1000; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	// Reduce completely (with a limit to avoid infinite loops)
+	result, _ = Reduce(result, 1000)
 
 	// Count nested applications of SUCC_MARKER
-	count = countApplications(result, "SUCC_MARKER")
-
-	return count
+	return countApplications(result, "SUCC_MARKER")
 }
 
 // ToBool converts a Church boolean to a Go bool
 // TRUE returns true, FALSE returns false
+// Church boolean: TRUE = λx.λy.x, FALSE = λx.λy.y
 func ToBool(term Object) bool {
-	// Reduce the term as much as possible first
-	for {
-		reduced, didReduce := term.BetaReduce()
-		if !didReduce {
-			break
-		}
-		term = reduced
-	}
-
 	// Apply the boolean to two distinct markers
 	// TRUE will return the first argument, FALSE will return the second
-	var result Object = Application{
+	result := Object(Application{
 		Func: Application{
 			Func: term,
 			Arg:  Var{Name: "TRUE_MARKER"},
 		},
 		Arg: Var{Name: "FALSE_MARKER"},
-	}
+	})
 
-	// Reduce completely
-	for i := 0; i < 1000; i++ {
-		reduced, didReduce := result.BetaReduce()
-		if !didReduce {
-			break
-		}
-		result = reduced
-	}
+	// Reduce completely (with a limit to avoid infinite loops)
+	result, _ = Reduce(result, 1000)
 
 	// Check which marker we got
 	if v, ok := result.(Var); ok {
