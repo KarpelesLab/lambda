@@ -200,23 +200,26 @@ var (
 
 // Control flow
 var (
-	// IFTHENELSE := λp.λa.λb.p a b
-	IFTHENELSE = Abstraction{
-		Param: "p",
+	// IF := λb.λx.λy.b x y
+	IF = Abstraction{
+		Param: "b",
 		Body: Abstraction{
-			Param: "a",
+			Param: "x",
 			Body: Abstraction{
-				Param: "b",
+				Param: "y",
 				Body: Application{
 					Func: Application{
-						Func: Var{Name: "p"},
-						Arg:  Var{Name: "a"},
+						Func: Var{Name: "b"},
+						Arg:  Var{Name: "x"},
 					},
-					Arg: Var{Name: "b"},
+					Arg: Var{Name: "y"},
 				},
 			},
 		},
 	}
+
+	// IFTHENELSE := λp.λa.λb.p a b (same as IF)
+	IFTHENELSE = IF
 )
 
 // Arithmetic operations
@@ -277,7 +280,7 @@ var (
 			Body: Application{
 				Func: Application{
 					Func: Var{Name: "n"},
-					Arg:  Var{Name: "PRED"},
+					Arg:  PRED,
 				},
 				Arg: Var{Name: "m"},
 			},
@@ -349,7 +352,74 @@ var (
 			},
 		},
 	}
+
+	// LT := λm.λn.NOT (LEQ n m)
+	LT = Abstraction{
+		Param: "m",
+		Body: Abstraction{
+			Param: "n",
+			Body: Application{
+				Func: NOT,
+				Arg: Application{
+					Func: Application{
+						Func: LEQ,
+						Arg:  Var{Name: "n"},
+					},
+					Arg: Var{Name: "m"},
+				},
+			},
+		},
+	}
 )
+
+// MOD := Y (λrec.λm.λn.(ISZERO n) ZERO ((LT m n) m (rec (SUB m n) n)))
+// Modulo operation with zero-divisor guard: m mod n = 0 if n = 0
+var MOD = Application{
+	Func: Y,
+	Arg: Abstraction{
+		Param: "rec",
+		Body: Abstraction{
+			Param: "m",
+			Body: Abstraction{
+				Param: "n",
+				Body: Application{
+					Func: Application{
+						Func: Application{
+							Func: ISZERO,
+							Arg:  Var{Name: "n"},
+						},
+						Arg: ChurchNumeral(0),
+					},
+					Arg: Application{
+						Func: Application{
+							Func: Application{
+								Func: Application{
+									Func: LT,
+									Arg:  Var{Name: "m"},
+								},
+								Arg: Var{Name: "n"},
+							},
+							Arg: Var{Name: "m"},
+						},
+						Arg: Application{
+							Func: Application{
+								Func: Var{Name: "rec"},
+								Arg: Application{
+									Func: Application{
+										Func: SUB,
+										Arg:  Var{Name: "m"},
+									},
+									Arg: Var{Name: "n"},
+								},
+							},
+							Arg: Var{Name: "n"},
+						},
+					},
+				},
+			},
+		},
+	},
+}
 
 // Pair operations
 var (

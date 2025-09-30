@@ -1,6 +1,7 @@
 package lambda
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -75,6 +76,9 @@ func TestParseConstantsInExpressions(t *testing.T) {
 		{"_SUCC _7", 8},
 		{"_POW _2 _3", 8},
 		{"_PLUS _1 (_MULT _2 _3)", 7},
+		{"_MOD _10 _3", 1},
+		{"_MOD _8 _3", 2},
+		{"_MOD _5 _0", 0}, // zero-divisor guard
 	}
 
 	for _, tt := range tests {
@@ -84,7 +88,13 @@ func TestParseConstantsInExpressions(t *testing.T) {
 				t.Fatalf("Parse(%q) error: %v", tt.input, err)
 			}
 
-			result, _ := Reduce(expr, 1000)
+			// MOD operations need more reduction steps
+			limit := 1000
+			if strings.Contains(tt.input, "MOD") {
+				limit = 10000
+			}
+
+			result, _ := Reduce(expr, limit)
 			got := ToInt(result)
 			if got != tt.expected {
 				t.Errorf("Parse(%q) reduced to %d, want %d", tt.input, got, tt.expected)
@@ -108,6 +118,12 @@ func TestParseBooleanConstants(t *testing.T) {
 		{"_OR _FALSE _FALSE", false},
 		{"_NOT _TRUE", false},
 		{"_NOT _FALSE", true},
+		{"_LT _3 _5", true},
+		{"_LT _5 _3", false},
+		{"_LT _5 _5", false},
+		{"_LEQ _3 _5", true},
+		{"_LEQ _5 _5", true},
+		{"_LEQ _7 _5", false},
 	}
 
 	for _, tt := range tests {
