@@ -234,43 +234,6 @@ See `lambda_test.go` for comprehensive examples including:
 - Factorial calculation
 - Reduction strategies
 
-## Visual Diagrams
-
-This library can generate visual diagrams of lambda terms based on the [tromp.github.io notation](https://tromp.github.io/cl/diagrams.html).
-
-### Identity Function (I)
-![Identity](diagrams/identity.svg)
-```go
-lambda.I.ToDiagram().ToUnicode()
-```
-
-### K Combinator
-![K Combinator](diagrams/k.svg)
-
-The K combinator (`λx.λy.x`) returns its first argument.
-
-### Church Numerals
-
-Church numeral 2 (`λf.λx.f (f x)`):
-
-![Church 2](diagrams/church_2.svg)
-
-Church numeral 3 (`λf.λx.f (f (f x))`):
-
-![Church 3](diagrams/church_3.svg)
-
-### S Combinator
-![S Combinator](diagrams/s.svg)
-
-The S combinator (`λx.λy.λz.x z (y z)`) - together with K, forms a complete combinator calculus basis.
-
-### Omega (ω)
-![Omega](diagrams/omega.svg)
-
-The self-application combinator (`λx.x x`).
-
-All diagrams are generated from the test suite and are guaranteed to match the actual implementation.
-
 ## Theory
 
 Lambda calculus consists of three basic constructs:
