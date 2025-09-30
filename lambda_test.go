@@ -402,6 +402,28 @@ func TestMult(t *testing.T) {
 	}
 }
 
+func TestPow(t *testing.T) {
+	// 2^3 = 8
+	two := ChurchNumeral(2)
+	three := ChurchNumeral(3)
+
+	var result Object = Application{
+		Func: Application{
+			Func: POW,
+			Arg:  two,
+		},
+		Arg: three,
+	}
+
+	// Reduce the result
+	result, _ = Reduce(result, 100)
+
+	resultInt := ToInt(result)
+	if resultInt != 8 {
+		t.Errorf("Expected 2^3 = 8, got %d", resultInt)
+	}
+}
+
 func TestFactorial(t *testing.T) {
 	// Test factorial(3) = 6
 	three := ChurchNumeral(3)

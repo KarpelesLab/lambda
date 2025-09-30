@@ -582,6 +582,18 @@ var (
 			},
 		},
 	}
+
+	// POW := λb.λn.n b (exponentiation: b^n)
+	POW = Abstraction{
+		Param: "b",
+		Body: Abstraction{
+			Param: "n",
+			Body: Application{
+				Func: Var{Name: "n"},
+				Arg:  Var{Name: "b"},
+			},
+		},
+	}
 )
 
 // Predicates

@@ -134,6 +134,7 @@ fmt.Println(lambda.ToInt(result)) // 6
 - **`SUCC`** - Successor function
 - **`PLUS`** - Addition
 - **`MULT`** - Multiplication
+- **`POW`** - Exponentiation
 - **`SUB`** - Subtraction
 - **`PRED`** - Predecessor (using Φ combinator)
 
