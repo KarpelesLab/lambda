@@ -12,114 +12,36 @@ package lambda
 // YI is another such term with no normal form.
 var (
 	// I := λx.x (Identity function)
-	I = Abstraction{
-		Param: "x",
-		Body:  Var{Name: "x"},
-	}
+	I = MakeLazyScript(`λx.x`)
 
 	// K := λx.λy.x (Constant/Cancel)
 	// Together with S, forms a complete combinator calculus basis (SK calculus)
-	K = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body:  Var{Name: "x"},
-		},
-	}
+	K = MakeLazyScript(`λx.λy.x`)
 
 	// S := λx.λy.λz.x z (y z) (Substitution)
 	// Together with K, forms a complete combinator calculus basis (SK calculus)
-	S = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body: Abstraction{
-				Param: "z",
-				Body: Application{
-					Func: Application{
-						Func: Var{Name: "x"},
-						Arg:  Var{Name: "z"},
-					},
-					Arg: Application{
-						Func: Var{Name: "y"},
-						Arg:  Var{Name: "z"},
-					},
-				},
-			},
-		},
-	}
+	S = MakeLazyScript(`λx.λy.λz.x z (y z)`)
 
 	// B := λx.λy.λz.x (y z) (Composition)
 	// Together with C, K, and W, forms a complete combinator calculus basis (BCKW calculus)
-	B = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body: Abstraction{
-				Param: "z",
-				Body: Application{
-					Func: Var{Name: "x"},
-					Arg: Application{
-						Func: Var{Name: "y"},
-						Arg:  Var{Name: "z"},
-					},
-				},
-			},
-		},
-	}
+	B = MakeLazyScript(`λx.λy.λz.x (y z)`)
 
 	// C := λx.λy.λz.x z y (Flip)
 	// Together with B, K, and W, forms a complete combinator calculus basis (BCKW calculus)
-	C = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body: Abstraction{
-				Param: "z",
-				Body: Application{
-					Func: Application{
-						Func: Var{Name: "x"},
-						Arg:  Var{Name: "z"},
-					},
-					Arg: Var{Name: "y"},
-				},
-			},
-		},
-	}
+	C = MakeLazyScript(`λx.λy.λz.x z y`)
 
 	// W := λx.λy.x y y (Warbler/Duplication)
 	// Together with B, C, and K, forms a complete combinator calculus basis (BCKW calculus)
-	W = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body: Application{
-				Func: Application{
-					Func: Var{Name: "x"},
-					Arg:  Var{Name: "y"},
-				},
-				Arg: Var{Name: "y"},
-			},
-		},
-	}
+	W = MakeLazyScript(`λx.λy.x y y`)
 
 	// U := λx.x x (Self-application)
 	// Also known as ω (omega) or Δ (delta)
-	U = Abstraction{
-		Param: "x",
-		Body: Application{
-			Func: Var{Name: "x"},
-			Arg:  Var{Name: "x"},
-		},
-	}
+	U = MakeLazyScript(`λx.x x`)
 
 	// Ω (Omega) := U U (or ω ω)
 	// The smallest term that has no normal form - it reduces to itself infinitely
 	// Another example of a term with no normal form is Y I
-	OMEGA = Application{
-		Func: U,
-		Arg:  U,
-	}
+	OMEGA = MakeLazyScript(`(λx.x x) (λx.x x)`)
 )
 
 // Aliases for combinators
@@ -138,13 +60,7 @@ var (
 
 	// FALSE := λx.λy.y
 	// Commonly abbreviated as F
-	FALSE = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body:  Var{Name: "y"},
-		},
-	}
+	FALSE = MakeLazyScript(`λx.λy.y`)
 
 	// T is an alias for TRUE
 	T = TRUE
@@ -156,67 +72,19 @@ var (
 // Boolean operations
 var (
 	// AND := λp.λq.p q p
-	AND = Abstraction{
-		Param: "p",
-		Body: Abstraction{
-			Param: "q",
-			Body: Application{
-				Func: Application{
-					Func: Var{Name: "p"},
-					Arg:  Var{Name: "q"},
-				},
-				Arg: Var{Name: "p"},
-			},
-		},
-	}
+	AND = MakeLazyScript(`λp.λq.p q p`)
 
 	// OR := λp.λq.p p q
-	OR = Abstraction{
-		Param: "p",
-		Body: Abstraction{
-			Param: "q",
-			Body: Application{
-				Func: Application{
-					Func: Var{Name: "p"},
-					Arg:  Var{Name: "p"},
-				},
-				Arg: Var{Name: "q"},
-			},
-		},
-	}
+	OR = MakeLazyScript(`λp.λq.p p q`)
 
 	// NOT := λp.p FALSE TRUE
-	NOT = Abstraction{
-		Param: "p",
-		Body: Application{
-			Func: Application{
-				Func: Var{Name: "p"},
-				Arg:  FALSE,
-			},
-			Arg: TRUE,
-		},
-	}
+	NOT = MakeLazyScript(`λp.p _FALSE _TRUE`)
 )
 
 // Control flow
 var (
 	// IF := λb.λx.λy.b x y
-	IF = Abstraction{
-		Param: "b",
-		Body: Abstraction{
-			Param: "x",
-			Body: Abstraction{
-				Param: "y",
-				Body: Application{
-					Func: Application{
-						Func: Var{Name: "b"},
-						Arg:  Var{Name: "x"},
-					},
-					Arg: Var{Name: "y"},
-				},
-			},
-		},
-	}
+	IF = MakeLazyScript(`λb.λx.λy.b x y`)
 
 	// IFTHENELSE := λp.λa.λb.p a b (same as IF)
 	IFTHENELSE = IF
@@ -225,52 +93,19 @@ var (
 // Arithmetic operations
 var (
 	// ZERO := λf.λx.x (Church numeral 0)
-	ZERO = Abstraction{
-		Param: "f",
-		Body: Abstraction{
-			Param: "x",
-			Body:  Var{Name: "x"},
-		},
-	}
+	ZERO = MakeLazyScript(`λf.λx.x`)
 
 	// SUCC := λn.λf.λx.f (n f x)
-	SUCC = Abstraction{
-		Param: "n",
-		Body: Abstraction{
-			Param: "f",
-			Body: Abstraction{
-				Param: "x",
-				Body: Application{
-					Func: Var{Name: "f"},
-					Arg: Application{
-						Func: Application{
-							Func: Var{Name: "n"},
-							Arg:  Var{Name: "f"},
-						},
-						Arg: Var{Name: "x"},
-					},
-				},
-			},
-		},
-	}
+	SUCC = MakeLazyScript(`λn.λf.λx.f (n f x)`)
 
 	// ONE := SUCC ZERO (Church numeral 1)
-	ONE = Application{
-		Func: SUCC,
-		Arg:  ZERO,
-	}
+	ONE = MakeLazyScript(`_SUCC _ZERO`)
 
 	// TWO := SUCC ONE (Church numeral 2)
-	TWO = Application{
-		Func: SUCC,
-		Arg:  ONE,
-	}
+	TWO = MakeLazyScript(`_SUCC _ONE`)
 
 	// THREE := SUCC TWO (Church numeral 3)
-	THREE = Application{
-		Func: SUCC,
-		Arg:  TWO,
-	}
+	THREE = MakeLazyScript(`_SUCC _TWO`)
 
 	// DEC := PRED (decrement, alias for predecessor)
 	DEC = PRED
@@ -279,210 +114,42 @@ var (
 	ADD = PLUS
 
 	// PLUS := λm.λn.λf.λx.m f (n f x)
-	PLUS = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Abstraction{
-				Param: "f",
-				Body: Abstraction{
-					Param: "x",
-					Body: Application{
-						Func: Application{
-							Func: Var{Name: "m"},
-							Arg:  Var{Name: "f"},
-						},
-						Arg: Application{
-							Func: Application{
-								Func: Var{Name: "n"},
-								Arg:  Var{Name: "f"},
-							},
-							Arg: Var{Name: "x"},
-						},
-					},
-				},
-			},
-		},
-	}
+	PLUS = MakeLazyScript(`λm.λn.λf.λx.m f (n f x)`)
 
 	// SUB := λm.λn.n PRED m
-	SUB = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg:  PRED,
-				},
-				Arg: Var{Name: "m"},
-			},
-		},
-	}
+	SUB = MakeLazyScript(`λm.λn.n _PRED m`)
 
 	// MULT := λm.λn.λf.m (n f)
-	MULT = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Abstraction{
-				Param: "f",
-				Body: Application{
-					Func: Var{Name: "m"},
-					Arg: Application{
-						Func: Var{Name: "n"},
-						Arg:  Var{Name: "f"},
-					},
-				},
-			},
-		},
-	}
+	MULT = MakeLazyScript(`λm.λn.λf.m (n f)`)
 
 	// POW := λb.λn.n b (exponentiation: b^n)
-	POW = Abstraction{
-		Param: "b",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: Var{Name: "n"},
-				Arg:  Var{Name: "b"},
-			},
-		},
-	}
+	POW = MakeLazyScript(`λb.λn.n b`)
 )
 
 // Predicates
 var (
 	// ISZERO := λn.n (λx.FALSE) TRUE
-	ISZERO = Abstraction{
-		Param: "n",
-		Body: Application{
-			Func: Application{
-				Func: Var{Name: "n"},
-				Arg: Abstraction{
-					Param: "x",
-					Body:  FALSE,
-				},
-			},
-			Arg: TRUE,
-		},
-	}
+	ISZERO = MakeLazyScript(`λn.n (λx._FALSE) _TRUE`)
 
 	// LEQ := λm.λn.ISZERO (SUB m n)
-	LEQ = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: ISZERO,
-				Arg: Application{
-					Func: Application{
-						Func: SUB,
-						Arg:  Var{Name: "m"},
-					},
-					Arg: Var{Name: "n"},
-				},
-			},
-		},
-	}
+	LEQ = MakeLazyScript(`λm.λn._ISZERO (_SUB m n)`)
 
 	// LT := λm.λn.NOT (LEQ n m)
-	LT = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: NOT,
-				Arg: Application{
-					Func: Application{
-						Func: LEQ,
-						Arg:  Var{Name: "n"},
-					},
-					Arg: Var{Name: "m"},
-				},
-			},
-		},
-	}
+	LT = MakeLazyScript(`λm.λn._NOT (_LEQ n m)`)
 
 	// EQ := λm.λn.AND (LEQ m n) (LEQ n m)
-	EQ = Abstraction{
-		Param: "m",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: Application{
-					Func: AND,
-					Arg: Application{
-						Func: Application{
-							Func: LEQ,
-							Arg:  Var{Name: "m"},
-						},
-						Arg: Var{Name: "n"},
-					},
-				},
-				Arg: Application{
-					Func: Application{
-						Func: LEQ,
-						Arg:  Var{Name: "n"},
-					},
-					Arg: Var{Name: "m"},
-				},
-			},
-		},
-	}
+	EQ = MakeLazyScript(`λm.λn._AND (_LEQ m n) (_LEQ n m)`)
 
 	// MAX := λa.λb.IF (LEQ a b) b a
-	MAX = Abstraction{
-		Param: "a",
-		Body: Abstraction{
-			Param: "b",
-			Body: Application{
-				Func: Application{
-					Func: Application{
-						Func: IF,
-						Arg: Application{
-							Func: Application{
-								Func: LEQ,
-								Arg:  Var{Name: "a"},
-							},
-							Arg: Var{Name: "b"},
-						},
-					},
-					Arg: Var{Name: "b"},
-				},
-				Arg: Var{Name: "a"},
-			},
-		},
-	}
+	MAX = MakeLazyScript(`λa.λb._IF (_LEQ a b) b a`)
 
 	// MIN := λa.λb.IF (LEQ a b) a b
-	MIN = Abstraction{
-		Param: "a",
-		Body: Abstraction{
-			Param: "b",
-			Body: Application{
-				Func: Application{
-					Func: Application{
-						Func: IF,
-						Arg: Application{
-							Func: Application{
-								Func: LEQ,
-								Arg:  Var{Name: "a"},
-							},
-							Arg: Var{Name: "b"},
-						},
-					},
-					Arg: Var{Name: "a"},
-				},
-				Arg: Var{Name: "b"},
-			},
-		},
-	}
+	MIN = MakeLazyScript(`λa.λb._IF (_LEQ a b) a b`)
 )
 
 // GCD := Y (λrec.λa.λb.IF (ISZERO b) a (rec b (MOD a b)))
 var GCD = MakeLazyScript(`
-	_Y (\rec.\a.\b.
+	_Y (λrec.λa.λb.
 		_IF (_ISZERO b)
 			a
 			(rec b (_MOD a b)))
@@ -491,7 +158,7 @@ var GCD = MakeLazyScript(`
 // MOD := Y (λrec.λm.λn.(ISZERO n) ZERO ((LT m n) m (rec (SUB m n) n)))
 // Modulo operation with zero-divisor guard: m mod n = 0 if n = 0
 var MOD = MakeLazyScript(`
-	_Y (\rec.\m.\n.
+	_Y (λrec.λm.λn.
 		(_ISZERO n) _ZERO
 		((_LT m n) m (rec (_SUB m n) n)))
 `)
@@ -499,136 +166,34 @@ var MOD = MakeLazyScript(`
 // Pair operations
 var (
 	// PAIR := λx.λy.λf.f x y
-	PAIR = Abstraction{
-		Param: "x",
-		Body: Abstraction{
-			Param: "y",
-			Body: Abstraction{
-				Param: "f",
-				Body: Application{
-					Func: Application{
-						Func: Var{Name: "f"},
-						Arg:  Var{Name: "x"},
-					},
-					Arg: Var{Name: "y"},
-				},
-			},
-		},
-	}
+	PAIR = MakeLazyScript(`λx.λy.λf.f x y`)
 
 	// FIRST := λp.p TRUE
-	FIRST = Abstraction{
-		Param: "p",
-		Body: Application{
-			Func: Var{Name: "p"},
-			Arg:  TRUE,
-		},
-	}
+	FIRST = MakeLazyScript(`λp.p _TRUE`)
 
 	// SECOND := λp.p FALSE
-	SECOND = Abstraction{
-		Param: "p",
-		Body: Application{
-			Func: Var{Name: "p"},
-			Arg:  FALSE,
-		},
-	}
+	SECOND = MakeLazyScript(`λp.p _FALSE`)
 )
 
 // Bit manipulation helpers
 var (
 	// STEP2 := λp.PAIR (IF (SECOND p) (SUCC (FIRST p)) (FIRST p)) (NOT (SECOND p))
-	STEP2 = Abstraction{
-		Param: "p",
-		Body: Application{
-			Func: Application{
-				Func: PAIR,
-				Arg: Application{
-					Func: Application{
-						Func: Application{
-							Func: IF,
-							Arg: Application{
-								Func: SECOND,
-								Arg:  Var{Name: "p"},
-							},
-						},
-						Arg: Application{
-							Func: SUCC,
-							Arg: Application{
-								Func: FIRST,
-								Arg:  Var{Name: "p"},
-							},
-						},
-					},
-					Arg: Application{
-						Func: FIRST,
-						Arg:  Var{Name: "p"},
-					},
-				},
-			},
-			Arg: Application{
-				Func: NOT,
-				Arg: Application{
-					Func: SECOND,
-					Arg:  Var{Name: "p"},
-				},
-			},
-		},
-	}
+	STEP2 = MakeLazyScript(`λp._PAIR (_IF (_SECOND p) (_SUCC (_FIRST p)) (_FIRST p)) (_NOT (_SECOND p))`)
 
 	// INIT2 := PAIR ZERO FALSE
-	INIT2 = Application{
-		Func: Application{
-			Func: PAIR,
-			Arg:  ZERO,
-		},
-		Arg: FALSE,
-	}
+	INIT2 = MakeLazyScript(`_PAIR _ZERO _FALSE`)
 )
 
 // Division and parity operations
 var (
 	// DIV2 := λn.FIRST (n STEP2 INIT2)
-	DIV2 = Abstraction{
-		Param: "n",
-		Body: Application{
-			Func: FIRST,
-			Arg: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg:  STEP2,
-				},
-				Arg: INIT2,
-			},
-		},
-	}
+	DIV2 = MakeLazyScript(`λn._FIRST (n _STEP2 _INIT2)`)
 
 	// ISODD := λn.SECOND (n STEP2 INIT2)
-	ISODD = Abstraction{
-		Param: "n",
-		Body: Application{
-			Func: SECOND,
-			Arg: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg:  STEP2,
-				},
-				Arg: INIT2,
-			},
-		},
-	}
+	ISODD = MakeLazyScript(`λn._SECOND (n _STEP2 _INIT2)`)
 
 	// ISEVEN := λn.NOT (ISODD n)
-	ISEVEN = Abstraction{
-		Param: "n",
-		Body: Application{
-			Func: NOT,
-			Arg: Application{
-				Func: ISODD,
-				Arg:  Var{Name: "n"},
-			},
-		},
-	}
+	ISEVEN = MakeLazyScript(`λn._NOT (_ISODD n)`)
 )
 
 // MUL := λm.λn.λf.m (n f)
@@ -638,7 +203,7 @@ var MUL = MULT
 // POWMOD' := Y (λrec.λa.λe.λm.λr.IF (ISZERO e) (IF (ISZERO m) r (MOD r m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m r) (rec (MOD (MUL a a) m) (DIV2 e) m (MOD (MUL r a) m))))
 // Tail-recursive modular exponentiation with accumulator
 var POWMOD_PRIME = MakeLazyScript(`
-	_Y (\rec.\a.\e.\m.\r.
+	_Y (λrec.λa.λe.λm.λr.
 		_IF (_ISZERO e)
 			(_IF (_ISZERO m) r (_MOD r m))
 			(_IF (_ISEVEN e)
@@ -648,7 +213,7 @@ var POWMOD_PRIME = MakeLazyScript(`
 
 // POWMOD := Y (λrec.λa.λe.λm.IF (ISZERO e) (IF (ISZERO m) ONE (MOD ONE m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m) (MOD (MUL a (rec (MOD (MUL a a) m) (DIV2 e) m)) m)))
 var POWMOD = MakeLazyScript(`
-	_Y (\rec.\a.\e.\m.
+	_Y (λrec.λa.λe.λm.
 		_IF (_ISZERO e)
 			(_IF (_ISZERO m) _ONE (_MOD _ONE m))
 			(_IF (_ISEVEN e)
@@ -659,70 +224,19 @@ var POWMOD = MakeLazyScript(`
 // Φ combinator for PRED
 var (
 	// Φ := λx.PAIR (SECOND x) (SUCC (SECOND x))
-	PHI = Abstraction{
-		Param: "x",
-		Body: Application{
-			Func: Application{
-				Func: PAIR,
-				Arg: Application{
-					Func: SECOND,
-					Arg:  Var{Name: "x"},
-				},
-			},
-			Arg: Application{
-				Func: SUCC,
-				Arg: Application{
-					Func: SECOND,
-					Arg:  Var{Name: "x"},
-				},
-			},
-		},
-	}
+	PHI = MakeLazyScript(`λx._PAIR (_SECOND x) (_SUCC (_SECOND x))`)
 
 	// PRED := λn.FIRST (n Φ (PAIR 0 0))
-	PRED = Abstraction{
-		Param: "n",
-		Body: Application{
-			Func: FIRST,
-			Arg: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg:  PHI,
-				},
-				Arg: Application{
-					Func: Application{
-						Func: PAIR,
-						Arg:  ChurchNumeral(0),
-					},
-					Arg: ChurchNumeral(0),
-				},
-			},
-		},
-	}
+	PRED = MakeLazyScript(`λn._FIRST (n _PHI (_PAIR _0 _0))`)
 )
 
 // List operations
 var (
 	// NIL := λx.TRUE
-	NIL = Abstraction{
-		Param: "x",
-		Body:  TRUE,
-	}
+	NIL = MakeLazyScript(`λx._TRUE`)
 
 	// NULL := λp.p (λx.λy.FALSE)
-	NULL = Abstraction{
-		Param: "p",
-		Body: Application{
-			Func: Var{Name: "p"},
-			Arg: Abstraction{
-				Param: "x",
-				Body: Abstraction{
-					Param: "y",
-					Body:  FALSE,
-				},
-			},
-		},
-	}
+	NULL = MakeLazyScript(`λp.p (λx.λy._FALSE)`)
 )
 
 // Y combinator for recursion
@@ -734,138 +248,18 @@ var (
 //
 // Alternative definition: Y = B U (C B U)
 // This alternative shows Y in terms of B, C, and U combinators.
-var Y = Abstraction{
-	Param: "f",
-	Body: Application{
-		Func: Abstraction{
-			Param: "x",
-			Body: Application{
-				Func: Var{Name: "f"},
-				Arg: Application{
-					Func: Var{Name: "x"},
-					Arg:  Var{Name: "x"},
-				},
-			},
-		},
-		Arg: Abstraction{
-			Param: "x",
-			Body: Application{
-				Func: Var{Name: "f"},
-				Arg: Application{
-					Func: Var{Name: "x"},
-					Arg:  Var{Name: "x"},
-				},
-			},
-		},
-	},
-}
+var Y = MakeLazyScript(`λf.(λx.f (x x)) (λx.f (x x))`)
 
 // FACTORIAL := Y (λf.λn.ISZERO n 1 (MULT n (f (PRED n))))
 var FACTORIAL = MakeLazyScript(`
-	_Y (\f.\n.
+	_Y (λf.λn.
 		(_ISZERO n) _1 (_MULT n (f (_PRED n))))
 `)
 
 // FAC is an alternative factorial implementation without Y combinator
 // FAC = λn.λf.n(λf.λn.n(f(λf.λx.n f(f x))))(λx.f)(λx.x)
-var FAC = Abstraction{
-	Param: "n",
-	Body: Abstraction{
-		Param: "f",
-		Body: Application{
-			Func: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg: Abstraction{
-						Param: "f",
-						Body: Abstraction{
-							Param: "n",
-							Body: Application{
-								Func: Var{Name: "n"},
-								Arg: Application{
-									Func: Var{Name: "f"},
-									Arg: Abstraction{
-										Param: "f",
-										Body: Abstraction{
-											Param: "x",
-											Body: Application{
-												Func: Application{
-													Func: Var{Name: "n"},
-													Arg:  Var{Name: "f"},
-												},
-												Arg: Application{
-													Func: Var{Name: "f"},
-													Arg:  Var{Name: "x"},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				Arg: Abstraction{
-					Param: "x",
-					Body:  Var{Name: "f"},
-				},
-			},
-			Arg: Abstraction{
-				Param: "x",
-				Body:  Var{Name: "x"},
-			},
-		},
-	},
-}
+var FAC = MakeLazyScript(`λn.λf.n(λf.λn.n(f(λf.λx.n f(f x))))(λx.f)(λx.x)`)
 
 // FIB is a Fibonacci implementation without Y combinator
 // FIB = λn.λf.n(λc.λa.λb.c b(λx.a (b x)))(λx.λy.x)(λx.x)f
-var FIB = Abstraction{
-	Param: "n",
-	Body: Abstraction{
-		Param: "f",
-		Body: Application{
-			Func: Application{
-				Func: Application{
-					Func: Var{Name: "n"},
-					Arg: Abstraction{
-						Param: "c",
-						Body: Abstraction{
-							Param: "a",
-							Body: Abstraction{
-								Param: "b",
-								Body: Application{
-									Func: Application{
-										Func: Var{Name: "c"},
-										Arg:  Var{Name: "b"},
-									},
-									Arg: Abstraction{
-										Param: "x",
-										Body: Application{
-											Func: Var{Name: "a"},
-											Arg: Application{
-												Func: Var{Name: "b"},
-												Arg:  Var{Name: "x"},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				Arg: Abstraction{
-					Param: "x",
-					Body: Abstraction{
-						Param: "y",
-						Body: Var{Name: "x"},
-					},
-				},
-			},
-			Arg: Abstraction{
-				Param: "x",
-				Body: Var{Name: "x"},
-			},
-		},
-	},
-}
+var FIB = MakeLazyScript(`λn.λf.n(λc.λa.λb.c b(λx.a (b x)))(λx.λy.x)(λx.x)f`)
