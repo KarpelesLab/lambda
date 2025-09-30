@@ -266,6 +266,12 @@ var (
 		Arg:  ONE,
 	}
 
+	// THREE := SUCC TWO (Church numeral 3)
+	THREE = Application{
+		Func: SUCC,
+		Arg:  TWO,
+	}
+
 	// DEC := PRED (decrement, alias for predecessor)
 	DEC = PRED
 

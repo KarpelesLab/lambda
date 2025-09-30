@@ -19,7 +19,14 @@ type Parser struct {
 //   - Application: f x or (f x)
 //   - Parentheses for grouping: (expr)
 func Parse(input string) (Object, error) {
-	p := &Parser{input: strings.TrimSpace(input), pos: 0}
+	input = strings.TrimSpace(input)
+
+	// First, check for balanced parentheses
+	if err := checkBalancedParens(input); err != nil {
+		return nil, err
+	}
+
+	p := &Parser{input: input, pos: 0}
 	result, err := p.parseExpr()
 	if err != nil {
 		return nil, err
@@ -32,6 +39,30 @@ func Parse(input string) (Object, error) {
 	}
 
 	return result, nil
+}
+
+// checkBalancedParens verifies that parentheses are balanced in the input
+func checkBalancedParens(input string) error {
+	balance := 0
+	for i, ch := range input {
+		switch ch {
+		case '(':
+			balance++
+		case ')':
+			balance--
+			if balance < 0 {
+				return fmt.Errorf("unbalanced parentheses: unexpected ')' at position %d", i)
+			}
+		}
+	}
+
+	if balance > 0 {
+		return fmt.Errorf("unbalanced parentheses: missing %d closing parenthesis(es)", balance)
+	} else if balance < 0 {
+		return fmt.Errorf("unbalanced parentheses: %d extra closing parenthesis(es)", -balance)
+	}
+
+	return nil
 }
 
 // parseExpr parses a complete expression
@@ -306,6 +337,7 @@ func lookupConstant(name string) (Object, bool) {
 		"_FACTORIAL":  FACTORIAL,
 		"_FAC":        FAC,
 		"_FIB":        FIB,
+		"_IS_PRIME":   IS_PRIME,
 	}
 
 	if obj, ok := constants[name]; ok {

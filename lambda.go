@@ -19,6 +19,54 @@ type Object interface {
 	EtaConvert() (Object, bool)
 }
 
+// LazyScript holds an unparsed expression that will be parsed on first use.
+// This allows defining constants that use Parse without creating initialization cycles.
+type LazyScript struct {
+	script string
+	parsed Object
+}
+
+// MakeLazyScript creates a new LazyScript from a string
+func MakeLazyScript(script string) *LazyScript {
+	return &LazyScript{script: script}
+}
+
+// parse parses and caches the expression on first use
+func (l *LazyScript) parse() Object {
+	if l.parsed == nil {
+		parsed, err := Parse(l.script)
+		if err != nil {
+			panic(fmt.Sprintf("LazyScript parse error: %v\nScript: %s", err, l.script))
+		}
+		l.parsed = parsed
+	}
+	return l.parsed
+}
+
+func (l *LazyScript) String() string {
+	return l.parse().String()
+}
+
+func (l *LazyScript) FreeVars() map[string]bool {
+	return l.parse().FreeVars()
+}
+
+func (l *LazyScript) Substitute(varName string, replacement Object) Object {
+	return l.parse().Substitute(varName, replacement)
+}
+
+func (l *LazyScript) AlphaConvert(oldName, newName string) Object {
+	return l.parse().AlphaConvert(oldName, newName)
+}
+
+func (l *LazyScript) BetaReduce() (Object, bool) {
+	return l.parse().BetaReduce()
+}
+
+func (l *LazyScript) EtaConvert() (Object, bool) {
+	return l.parse().EtaConvert()
+}
+
 // Var represents a variable
 type Var struct {
 	Name string
