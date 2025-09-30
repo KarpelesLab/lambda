@@ -475,6 +475,226 @@ var (
 	}
 )
 
+// Bit manipulation helpers
+var (
+	// STEP2 := λp.PAIR (IF (SECOND p) (SUCC (FIRST p)) (FIRST p)) (NOT (SECOND p))
+	STEP2 = Abstraction{
+		Param: "p",
+		Body: Application{
+			Func: Application{
+				Func: PAIR,
+				Arg: Application{
+					Func: Application{
+						Func: Application{
+							Func: IF,
+							Arg: Application{
+								Func: SECOND,
+								Arg:  Var{Name: "p"},
+							},
+						},
+						Arg: Application{
+							Func: SUCC,
+							Arg: Application{
+								Func: FIRST,
+								Arg:  Var{Name: "p"},
+							},
+						},
+					},
+					Arg: Application{
+						Func: FIRST,
+						Arg:  Var{Name: "p"},
+					},
+				},
+			},
+			Arg: Application{
+				Func: NOT,
+				Arg: Application{
+					Func: SECOND,
+					Arg:  Var{Name: "p"},
+				},
+			},
+		},
+	}
+
+	// INIT2 := PAIR ZERO FALSE
+	INIT2 = Application{
+		Func: Application{
+			Func: PAIR,
+			Arg:  ZERO,
+		},
+		Arg: FALSE,
+	}
+)
+
+// Division and parity operations
+var (
+	// DIV2 := λn.FIRST (n STEP2 INIT2)
+	DIV2 = Abstraction{
+		Param: "n",
+		Body: Application{
+			Func: FIRST,
+			Arg: Application{
+				Func: Application{
+					Func: Var{Name: "n"},
+					Arg:  STEP2,
+				},
+				Arg: INIT2,
+			},
+		},
+	}
+
+	// ISODD := λn.SECOND (n STEP2 INIT2)
+	ISODD = Abstraction{
+		Param: "n",
+		Body: Application{
+			Func: SECOND,
+			Arg: Application{
+				Func: Application{
+					Func: Var{Name: "n"},
+					Arg:  STEP2,
+				},
+				Arg: INIT2,
+			},
+		},
+	}
+
+	// ISEVEN := λn.NOT (ISODD n)
+	ISEVEN = Abstraction{
+		Param: "n",
+		Body: Application{
+			Func: NOT,
+			Arg: Application{
+				Func: ISODD,
+				Arg:  Var{Name: "n"},
+			},
+		},
+	}
+)
+
+// MUL := λm.λn.λf.m (n f)
+// Note: MUL is already defined above as MULT, but we need it for POWMOD
+var MUL = MULT
+
+// POWMOD := Y (λrec.λa.λe.λm.IF (ISZERO e) (IF (ISZERO m) ONE (MOD ONE m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m) (MOD (MUL a (rec (MOD (MUL a a) m) (DIV2 e) m)) m)))
+var POWMOD = Application{
+	Func: Y,
+	Arg: Abstraction{
+		Param: "rec",
+		Body: Abstraction{
+			Param: "a",
+			Body: Abstraction{
+				Param: "e",
+				Body: Abstraction{
+					Param: "m",
+					Body: Application{
+						Func: Application{
+							Func: Application{
+								Func: IF,
+								Arg: Application{
+									Func: ISZERO,
+									Arg:  Var{Name: "e"},
+								},
+							},
+							Arg: Application{
+								Func: Application{
+									Func: Application{
+										Func: IF,
+										Arg: Application{
+											Func: ISZERO,
+											Arg:  Var{Name: "m"},
+										},
+									},
+									Arg: ONE,
+								},
+								Arg: Application{
+									Func: Application{
+										Func: MOD,
+										Arg:  ONE,
+									},
+									Arg: Var{Name: "m"},
+								},
+							},
+						},
+						Arg: Application{
+							Func: Application{
+								Func: Application{
+									Func: IF,
+									Arg: Application{
+										Func: ISEVEN,
+										Arg:  Var{Name: "e"},
+									},
+								},
+								Arg: Application{
+									Func: Application{
+										Func: Application{
+											Func: Var{Name: "rec"},
+											Arg: Application{
+												Func: Application{
+													Func: MOD,
+													Arg: Application{
+														Func: Application{
+															Func: MUL,
+															Arg:  Var{Name: "a"},
+														},
+														Arg: Var{Name: "a"},
+													},
+												},
+												Arg: Var{Name: "m"},
+											},
+										},
+										Arg: Application{
+											Func: DIV2,
+											Arg:  Var{Name: "e"},
+										},
+									},
+									Arg: Var{Name: "m"},
+								},
+							},
+							Arg: Application{
+								Func: Application{
+									Func: MOD,
+									Arg: Application{
+										Func: Application{
+											Func: MUL,
+											Arg:  Var{Name: "a"},
+										},
+										Arg: Application{
+											Func: Application{
+												Func: Application{
+													Func: Var{Name: "rec"},
+													Arg: Application{
+														Func: Application{
+															Func: MOD,
+															Arg: Application{
+																Func: Application{
+																	Func: MUL,
+																	Arg:  Var{Name: "a"},
+																},
+																Arg: Var{Name: "a"},
+															},
+														},
+														Arg: Var{Name: "m"},
+													},
+												},
+												Arg: Application{
+													Func: DIV2,
+													Arg:  Var{Name: "e"},
+												},
+											},
+											Arg: Var{Name: "m"},
+										},
+									},
+								},
+								Arg: Var{Name: "m"},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 // Φ combinator for PRED
 var (
 	// Φ := λx.PAIR (SECOND x) (SUCC (SECOND x))
