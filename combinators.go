@@ -481,92 +481,20 @@ var (
 )
 
 // GCD := Y (λrec.λa.λb.IF (ISZERO b) a (rec b (MOD a b)))
-var GCD = Application{
-	Func: Y,
-	Arg: Abstraction{
-		Param: "rec",
-		Body: Abstraction{
-			Param: "a",
-			Body: Abstraction{
-				Param: "b",
-				Body: Application{
-					Func: Application{
-						Func: Application{
-							Func: IF,
-							Arg: Application{
-								Func: ISZERO,
-								Arg:  Var{Name: "b"},
-							},
-						},
-						Arg: Var{Name: "a"},
-					},
-					Arg: Application{
-						Func: Application{
-							Func: Var{Name: "rec"},
-							Arg:  Var{Name: "b"},
-						},
-						Arg: Application{
-							Func: Application{
-								Func: MOD,
-								Arg:  Var{Name: "a"},
-							},
-							Arg: Var{Name: "b"},
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var GCD = MakeLazyScript(`
+	_Y (\rec.\a.\b.
+		_IF (_ISZERO b)
+			a
+			(rec b (_MOD a b)))
+`)
 
 // MOD := Y (λrec.λm.λn.(ISZERO n) ZERO ((LT m n) m (rec (SUB m n) n)))
 // Modulo operation with zero-divisor guard: m mod n = 0 if n = 0
-var MOD = Application{
-	Func: Y,
-	Arg: Abstraction{
-		Param: "rec",
-		Body: Abstraction{
-			Param: "m",
-			Body: Abstraction{
-				Param: "n",
-				Body: Application{
-					Func: Application{
-						Func: Application{
-							Func: ISZERO,
-							Arg:  Var{Name: "n"},
-						},
-						Arg: ChurchNumeral(0),
-					},
-					Arg: Application{
-						Func: Application{
-							Func: Application{
-								Func: Application{
-									Func: LT,
-									Arg:  Var{Name: "m"},
-								},
-								Arg: Var{Name: "n"},
-							},
-							Arg: Var{Name: "m"},
-						},
-						Arg: Application{
-							Func: Application{
-								Func: Var{Name: "rec"},
-								Arg: Application{
-									Func: Application{
-										Func: SUB,
-										Arg:  Var{Name: "m"},
-									},
-									Arg: Var{Name: "n"},
-								},
-							},
-							Arg: Var{Name: "n"},
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var MOD = MakeLazyScript(`
+	_Y (\rec.\m.\n.
+		(_ISZERO n) _ZERO
+		((_LT m n) m (rec (_SUB m n) n)))
+`)
 
 // Pair operations
 var (
@@ -709,253 +637,24 @@ var MUL = MULT
 
 // POWMOD' := Y (λrec.λa.λe.λm.λr.IF (ISZERO e) (IF (ISZERO m) r (MOD r m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m r) (rec (MOD (MUL a a) m) (DIV2 e) m (MOD (MUL r a) m))))
 // Tail-recursive modular exponentiation with accumulator
-var POWMOD_PRIME = Application{
-	Func: Y,
-	Arg: Abstraction{
-		Param: "rec",
-		Body: Abstraction{
-			Param: "a",
-			Body: Abstraction{
-				Param: "e",
-				Body: Abstraction{
-					Param: "m",
-					Body: Abstraction{
-						Param: "r",
-						Body: Application{
-							Func: Application{
-								Func: Application{
-									Func: IF,
-									Arg: Application{
-										Func: ISZERO,
-										Arg:  Var{Name: "e"},
-									},
-								},
-								Arg: Application{
-									Func: Application{
-										Func: Application{
-											Func: IF,
-											Arg: Application{
-												Func: ISZERO,
-												Arg:  Var{Name: "m"},
-											},
-										},
-										Arg: Var{Name: "r"},
-									},
-									Arg: Application{
-										Func: Application{
-											Func: MOD,
-											Arg:  Var{Name: "r"},
-										},
-										Arg: Var{Name: "m"},
-									},
-								},
-							},
-							Arg: Application{
-								Func: Application{
-									Func: Application{
-										Func: IF,
-										Arg: Application{
-											Func: ISEVEN,
-											Arg:  Var{Name: "e"},
-										},
-									},
-									Arg: Application{
-										Func: Application{
-											Func: Application{
-												Func: Application{
-													Func: Var{Name: "rec"},
-													Arg: Application{
-														Func: Application{
-															Func: MOD,
-															Arg: Application{
-																Func: Application{
-																	Func: MUL,
-																	Arg:  Var{Name: "a"},
-																},
-																Arg: Var{Name: "a"},
-															},
-														},
-														Arg: Var{Name: "m"},
-													},
-												},
-												Arg: Application{
-													Func: DIV2,
-													Arg:  Var{Name: "e"},
-												},
-											},
-											Arg: Var{Name: "m"},
-										},
-										Arg: Var{Name: "r"},
-									},
-								},
-								Arg: Application{
-									Func: Application{
-										Func: Application{
-											Func: Application{
-												Func: Var{Name: "rec"},
-												Arg: Application{
-													Func: Application{
-														Func: MOD,
-														Arg: Application{
-															Func: Application{
-																Func: MUL,
-																Arg:  Var{Name: "a"},
-															},
-															Arg: Var{Name: "a"},
-														},
-													},
-													Arg: Var{Name: "m"},
-												},
-											},
-											Arg: Application{
-												Func: DIV2,
-												Arg:  Var{Name: "e"},
-											},
-										},
-										Arg: Var{Name: "m"},
-									},
-									Arg: Application{
-										Func: Application{
-											Func: MOD,
-											Arg: Application{
-												Func: Application{
-													Func: MUL,
-													Arg:  Var{Name: "r"},
-												},
-												Arg: Var{Name: "a"},
-											},
-										},
-										Arg: Var{Name: "m"},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var POWMOD_PRIME = MakeLazyScript(`
+	_Y (\rec.\a.\e.\m.\r.
+		_IF (_ISZERO e)
+			(_IF (_ISZERO m) r (_MOD r m))
+			(_IF (_ISEVEN e)
+				(rec (_MOD (_MUL a a) m) (_DIV2 e) m r)
+				(rec (_MOD (_MUL a a) m) (_DIV2 e) m (_MOD (_MUL r a) m))))
+`)
 
 // POWMOD := Y (λrec.λa.λe.λm.IF (ISZERO e) (IF (ISZERO m) ONE (MOD ONE m)) (IF (ISEVEN e) (rec (MOD (MUL a a) m) (DIV2 e) m) (MOD (MUL a (rec (MOD (MUL a a) m) (DIV2 e) m)) m)))
-var POWMOD = Application{
-	Func: Y,
-	Arg: Abstraction{
-		Param: "rec",
-		Body: Abstraction{
-			Param: "a",
-			Body: Abstraction{
-				Param: "e",
-				Body: Abstraction{
-					Param: "m",
-					Body: Application{
-						Func: Application{
-							Func: Application{
-								Func: IF,
-								Arg: Application{
-									Func: ISZERO,
-									Arg:  Var{Name: "e"},
-								},
-							},
-							Arg: Application{
-								Func: Application{
-									Func: Application{
-										Func: IF,
-										Arg: Application{
-											Func: ISZERO,
-											Arg:  Var{Name: "m"},
-										},
-									},
-									Arg: ONE,
-								},
-								Arg: Application{
-									Func: Application{
-										Func: MOD,
-										Arg:  ONE,
-									},
-									Arg: Var{Name: "m"},
-								},
-							},
-						},
-						Arg: Application{
-							Func: Application{
-								Func: Application{
-									Func: IF,
-									Arg: Application{
-										Func: ISEVEN,
-										Arg:  Var{Name: "e"},
-									},
-								},
-								Arg: Application{
-									Func: Application{
-										Func: Application{
-											Func: Var{Name: "rec"},
-											Arg: Application{
-												Func: Application{
-													Func: MOD,
-													Arg: Application{
-														Func: Application{
-															Func: MUL,
-															Arg:  Var{Name: "a"},
-														},
-														Arg: Var{Name: "a"},
-													},
-												},
-												Arg: Var{Name: "m"},
-											},
-										},
-										Arg: Application{
-											Func: DIV2,
-											Arg:  Var{Name: "e"},
-										},
-									},
-									Arg: Var{Name: "m"},
-								},
-							},
-							Arg: Application{
-								Func: Application{
-									Func: MOD,
-									Arg: Application{
-										Func: Application{
-											Func: MUL,
-											Arg:  Var{Name: "a"},
-										},
-										Arg: Application{
-											Func: Application{
-												Func: Application{
-													Func: Var{Name: "rec"},
-													Arg: Application{
-														Func: Application{
-															Func: MOD,
-															Arg: Application{
-																Func: Application{
-																	Func: MUL,
-																	Arg:  Var{Name: "a"},
-																},
-																Arg: Var{Name: "a"},
-															},
-														},
-														Arg: Var{Name: "m"},
-													},
-												},
-												Arg: Application{
-													Func: DIV2,
-													Arg:  Var{Name: "e"},
-												},
-											},
-											Arg: Var{Name: "m"},
-										},
-									},
-								},
-								Arg: Var{Name: "m"},
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var POWMOD = MakeLazyScript(`
+	_Y (\rec.\a.\e.\m.
+		_IF (_ISZERO e)
+			(_IF (_ISZERO m) _ONE (_MOD _ONE m))
+			(_IF (_ISEVEN e)
+				(rec (_MOD (_MUL a a) m) (_DIV2 e) m)
+				(_MOD (_MUL a (rec (_MOD (_MUL a a) m) (_DIV2 e) m)) m)))
+`)
 
 // Φ combinator for PRED
 var (
@@ -1062,37 +761,10 @@ var Y = Abstraction{
 }
 
 // FACTORIAL := Y (λf.λn.ISZERO n 1 (MULT n (f (PRED n))))
-var FACTORIAL = Application{
-	Func: Y,
-	Arg: Abstraction{
-		Param: "f",
-		Body: Abstraction{
-			Param: "n",
-			Body: Application{
-				Func: Application{
-					Func: Application{
-						Func: ISZERO,
-						Arg:  Var{Name: "n"},
-					},
-					Arg: ChurchNumeral(1),
-				},
-				Arg: Application{
-					Func: Application{
-						Func: MULT,
-						Arg:  Var{Name: "n"},
-					},
-					Arg: Application{
-						Func: Var{Name: "f"},
-						Arg: Application{
-							Func: PRED,
-							Arg:  Var{Name: "n"},
-						},
-					},
-				},
-			},
-		},
-	},
-}
+var FACTORIAL = MakeLazyScript(`
+	_Y (\f.\n.
+		(_ISZERO n) _1 (_MULT n (f (_PRED n))))
+`)
 
 // FAC is an alternative factorial implementation without Y combinator
 // FAC = λn.λf.n(λf.λn.n(f(λf.λx.n f(f x))))(λx.f)(λx.x)
