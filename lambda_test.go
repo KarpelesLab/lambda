@@ -484,13 +484,10 @@ func TestFIB(t *testing.T) {
 	for _, tt := range tests {
 		n := ChurchNumeral(tt.n)
 
-		// Apply FIB to n and SUCC (since FIB returns λf....)
+		// FIB n returns a Church numeral directly
 		var result Term = Application{
-			Func: Application{
-				Func: FIB,
-				Arg:  n,
-			},
-			Arg: Var{Name: "SUCC_MARKER"},
+			Func: FIB,
+			Arg:  n,
 		}
 
 		// Reduce

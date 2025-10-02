@@ -225,8 +225,14 @@ func (a Abstraction) BetaReduce() (Term, bool) {
 }
 
 func (a Application) BetaReduce() (Term, bool) {
+	// Unwrap LazyScript if present
+	funcTerm := a.Func
+	if ls, ok := funcTerm.(*LazyScript); ok {
+		funcTerm = ls.parse()
+	}
+
 	// Check if we can do β-reduction at the top level
-	if abs, ok := a.Func.(Abstraction); ok {
+	if abs, ok := funcTerm.(Abstraction); ok {
 		// (λx.t) s → t[x := s]
 		result := abs.Body.Substitute(abs.Param, a.Arg)
 		return result, true
