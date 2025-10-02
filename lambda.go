@@ -4,26 +4,26 @@ import (
 	"fmt"
 )
 
-// Object is the interface for all lambda calculus terms
-type Object interface {
+// Term is the interface for all lambda calculus terms
+type Term interface {
 	String() string
 	// FreeVars returns the set of free variables in the term
 	FreeVars() map[string]bool
 	// Substitute replaces a variable with a term
-	Substitute(varName string, replacement Object) Object
+	Substitute(varName string, replacement Term) Term
 	// AlphaConvert renames a bound variable
-	AlphaConvert(oldName, newName string) Object
+	AlphaConvert(oldName, newName string) Term
 	// BetaReduce performs one step of β-reduction if possible
-	BetaReduce() (Object, bool)
+	BetaReduce() (Term, bool)
 	// EtaConvert performs η-conversion if possible
-	EtaConvert() (Object, bool)
+	EtaConvert() (Term, bool)
 }
 
 // LazyScript holds an unparsed expression that will be parsed on first use.
 // This allows defining constants that use Parse without creating initialization cycles.
 type LazyScript struct {
 	script string
-	parsed Object
+	parsed Term
 }
 
 // MakeLazyScript creates a new LazyScript from a string
@@ -32,7 +32,7 @@ func MakeLazyScript(script string) *LazyScript {
 }
 
 // parse parses and caches the expression on first use
-func (l *LazyScript) parse() Object {
+func (l *LazyScript) parse() Term {
 	if l.parsed == nil {
 		parsed, err := Parse(l.script)
 		if err != nil {
@@ -51,19 +51,19 @@ func (l *LazyScript) FreeVars() map[string]bool {
 	return l.parse().FreeVars()
 }
 
-func (l *LazyScript) Substitute(varName string, replacement Object) Object {
+func (l *LazyScript) Substitute(varName string, replacement Term) Term {
 	return l.parse().Substitute(varName, replacement)
 }
 
-func (l *LazyScript) AlphaConvert(oldName, newName string) Object {
+func (l *LazyScript) AlphaConvert(oldName, newName string) Term {
 	return l.parse().AlphaConvert(oldName, newName)
 }
 
-func (l *LazyScript) BetaReduce() (Object, bool) {
+func (l *LazyScript) BetaReduce() (Term, bool) {
 	return l.parse().BetaReduce()
 }
 
-func (l *LazyScript) EtaConvert() (Object, bool) {
+func (l *LazyScript) EtaConvert() (Term, bool) {
 	return l.parse().EtaConvert()
 }
 
@@ -75,13 +75,13 @@ type Var struct {
 // Abstraction represents an abstraction (λx.t)
 type Abstraction struct {
 	Param string // The bound variable
-	Body  Object // The body of the abstraction
+	Body  Term   // The body of the abstraction
 }
 
 // Application represents an application (t s)
 type Application struct {
-	Func Object // The function
-	Arg  Object // The argument
+	Func Term // The function
+	Arg  Term // The argument
 }
 
 // String methods
@@ -130,14 +130,14 @@ func (a Application) FreeVars() map[string]bool {
 }
 
 // Substitute implementations
-func (v Var) Substitute(varName string, replacement Object) Object {
+func (v Var) Substitute(varName string, replacement Term) Term {
 	if v.Name == varName {
 		return replacement
 	}
 	return v
 }
 
-func (a Abstraction) Substitute(varName string, replacement Object) Object {
+func (a Abstraction) Substitute(varName string, replacement Term) Term {
 	if a.Param == varName {
 		// Variable is bound, no substitution in body
 		return a
@@ -154,7 +154,7 @@ func (a Abstraction) Substitute(varName string, replacement Object) Object {
 	return Abstraction{Param: a.Param, Body: a.Body.Substitute(varName, replacement)}
 }
 
-func (a Application) Substitute(varName string, replacement Object) Object {
+func (a Application) Substitute(varName string, replacement Term) Term {
 	return Application{
 		Func: a.Func.Substitute(varName, replacement),
 		Arg:  a.Arg.Substitute(varName, replacement),
@@ -162,14 +162,14 @@ func (a Application) Substitute(varName string, replacement Object) Object {
 }
 
 // AlphaConvert implementations
-func (v Var) AlphaConvert(oldName, newName string) Object {
+func (v Var) AlphaConvert(oldName, newName string) Term {
 	if v.Name == oldName {
 		return Var{Name: newName}
 	}
 	return v
 }
 
-func (a Abstraction) AlphaConvert(oldName, newName string) Object {
+func (a Abstraction) AlphaConvert(oldName, newName string) Term {
 	if a.Param == oldName {
 		return Abstraction{
 			Param: newName,
@@ -182,7 +182,7 @@ func (a Abstraction) AlphaConvert(oldName, newName string) Object {
 	}
 }
 
-func (a Application) AlphaConvert(oldName, newName string) Object {
+func (a Application) AlphaConvert(oldName, newName string) Term {
 	return Application{
 		Func: a.Func.AlphaConvert(oldName, newName),
 		Arg:  a.Arg.AlphaConvert(oldName, newName),
@@ -192,7 +192,7 @@ func (a Application) AlphaConvert(oldName, newName string) Object {
 // Reduce performs multiple β-reductions up to a maximum number of steps.
 // It returns the reduced term and the number of reductions performed.
 // If limit is 0 or negative, a default limit of 1000 is used.
-func Reduce(obj Object, limit int) (Object, int) {
+func Reduce(obj Term, limit int) (Term, int) {
 	if limit <= 0 {
 		limit = 1000
 	}
@@ -211,11 +211,11 @@ func Reduce(obj Object, limit int) (Object, int) {
 }
 
 // BetaReduce implementations
-func (v Var) BetaReduce() (Object, bool) {
+func (v Var) BetaReduce() (Term, bool) {
 	return v, false
 }
 
-func (a Abstraction) BetaReduce() (Object, bool) {
+func (a Abstraction) BetaReduce() (Term, bool) {
 	// Try to reduce the body
 	newBody, reduced := a.Body.BetaReduce()
 	if reduced {
@@ -224,7 +224,7 @@ func (a Abstraction) BetaReduce() (Object, bool) {
 	return a, false
 }
 
-func (a Application) BetaReduce() (Object, bool) {
+func (a Application) BetaReduce() (Term, bool) {
 	// Check if we can do β-reduction at the top level
 	if abs, ok := a.Func.(Abstraction); ok {
 		// (λx.t) s → t[x := s]
@@ -248,11 +248,11 @@ func (a Application) BetaReduce() (Object, bool) {
 }
 
 // EtaConvert implementations
-func (v Var) EtaConvert() (Object, bool) {
+func (v Var) EtaConvert() (Term, bool) {
 	return v, false
 }
 
-func (a Abstraction) EtaConvert() (Object, bool) {
+func (a Abstraction) EtaConvert() (Term, bool) {
 	// η-reduction: λx.(f x) → f if x is not free in f
 	if app, ok := a.Body.(Application); ok {
 		if v, ok := app.Arg.(Var); ok && v.Name == a.Param {
@@ -272,7 +272,7 @@ func (a Abstraction) EtaConvert() (Object, bool) {
 	return a, false
 }
 
-func (a Application) EtaConvert() (Object, bool) {
+func (a Application) EtaConvert() (Term, bool) {
 	// Try to η-convert the function
 	newFunc, converted := a.Func.EtaConvert()
 	if converted {
@@ -308,13 +308,13 @@ func freshVar(base string, avoid map[string]bool) string {
 // 0 := λf.λx.x
 // 1 := λf.λx.f x
 // 2 := λf.λx.f (f x)
-func ChurchNumeral(n int) Object {
+func ChurchNumeral(n int) Term {
 	if n < 0 {
 		panic("Church numerals are only defined for non-negative integers")
 	}
 
 	// Build f (f (f ... (f x)...))
-	var body Object = Var{Name: "x"}
+	var body Term = Var{Name: "x"}
 	for i := 0; i < n; i++ {
 		body = Application{Func: Var{Name: "f"}, Arg: body}
 	}
@@ -331,11 +331,11 @@ func ChurchNumeral(n int) Object {
 
 // ToInt converts a Church numeral to a Go integer by applying it to increment and 0
 // Church numeral n = λf.λx.f^n x, so we apply it to a marker function and count applications
-func ToInt(term Object) int {
+func ToInt(term Term) int {
 	// Apply the Church numeral to an increment function and 0
 	// Church numeral n applied to f and 0 will call f n times
 	// We'll use a marker to count
-	result := Object(Application{
+	result := Term(Application{
 		Func: Application{
 			Func: term,
 			Arg:  Var{Name: "SUCC_MARKER"},
@@ -353,10 +353,10 @@ func ToInt(term Object) int {
 // ToBool converts a Church boolean to a Go bool
 // TRUE returns true, FALSE returns false
 // Church boolean: TRUE = λx.λy.x, FALSE = λx.λy.y
-func ToBool(term Object) bool {
+func ToBool(term Term) bool {
 	// Apply the boolean to two distinct markers
 	// TRUE will return the first argument, FALSE will return the second
-	result := Object(Application{
+	result := Term(Application{
 		Func: Application{
 			Func: term,
 			Arg:  Var{Name: "TRUE_MARKER"},
@@ -382,7 +382,7 @@ func ToBool(term Object) bool {
 }
 
 // Helper function to count nested applications of a specific function
-func countApplications(term Object, funcName string) int {
+func countApplications(term Term, funcName string) int {
 	switch t := term.(type) {
 	case Var:
 		if t.Name == "ZERO_MARKER" {

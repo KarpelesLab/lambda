@@ -65,7 +65,7 @@ func TestPrimalityComponents(t *testing.T) {
 		}
 
 		// Reduce step by step to find where it goes wrong
-		current := Object(result)
+		current := Term(result)
 		for i := 0; i < 20; i++ {
 			next, steps := Reduce(current, 1)
 			if steps == 0 {

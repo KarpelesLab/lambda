@@ -39,7 +39,7 @@ func TestParseDigitConstants(t *testing.T) {
 func TestParseNamedConstants(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected Object
+		expected Term
 	}{
 		{"_I", I},
 		{"_K", K},

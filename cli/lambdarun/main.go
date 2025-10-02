@@ -95,9 +95,9 @@ func main() {
 	}
 }
 
-// tryToInt attempts to interpret an Object as a Church numeral
+// tryToInt attempts to interpret a Term as a Church numeral
 // Returns the integer value and true if successful, or 0 and false otherwise
-func tryToInt(obj lambda.Object) (int, bool) {
+func tryToInt(obj lambda.Term) (int, bool) {
 	// Church numerals have the form: λf.λx. f (f (f ... (f x)))
 	// Try to extract the number of applications
 	abs1, ok := obj.(lambda.Abstraction)
@@ -134,9 +134,9 @@ func tryToInt(obj lambda.Object) (int, bool) {
 	}
 }
 
-// tryToBool attempts to interpret an Object as a Church boolean
+// tryToBool attempts to interpret a Term as a Church boolean
 // Returns the boolean value and true if successful, or false and false otherwise
-func tryToBool(obj lambda.Object) (bool, bool) {
+func tryToBool(obj lambda.Term) (bool, bool) {
 	// Church booleans have the form:
 	// TRUE  = λx.λy.x
 	// FALSE = λx.λy.y

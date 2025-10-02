@@ -12,13 +12,13 @@ type Parser struct {
 	pos   int
 }
 
-// Parse parses a lambda expression string and returns the corresponding Object
+// Parse parses a lambda expression string and returns the corresponding Term
 // Supported syntax:
 //   - Variables: x, y, foo, bar123
 //   - Abstraction: λx.body or \x.body
 //   - Application: f x or (f x)
 //   - Parentheses for grouping: (expr)
-func Parse(input string) (Object, error) {
+func Parse(input string) (Term, error) {
 	input = strings.TrimSpace(input)
 
 	// First, check for balanced parentheses
@@ -66,7 +66,7 @@ func checkBalancedParens(input string) error {
 }
 
 // parseExpr parses a complete expression
-func (p *Parser) parseExpr() (Object, error) {
+func (p *Parser) parseExpr() (Term, error) {
 	p.skipWhitespace()
 
 	if p.pos >= len(p.input) {
@@ -83,7 +83,7 @@ func (p *Parser) parseExpr() (Object, error) {
 }
 
 // parseAbstraction parses a lambda abstraction: λx.body or \x.body
-func (p *Parser) parseAbstraction() (Object, error) {
+func (p *Parser) parseAbstraction() (Term, error) {
 	// Consume lambda symbol
 	if p.peekRune() == 'λ' {
 		p.pos += len("λ") // λ is multi-byte UTF-8
@@ -120,7 +120,7 @@ func (p *Parser) parseAbstraction() (Object, error) {
 
 // parseApplication parses function application (left-associative)
 // Examples: f x, f x y (= (f x) y), (f x) y
-func (p *Parser) parseApplication() (Object, error) {
+func (p *Parser) parseApplication() (Term, error) {
 	// Parse the first term
 	left, err := p.parseTerm()
 	if err != nil {
@@ -156,7 +156,7 @@ func (p *Parser) parseApplication() (Object, error) {
 }
 
 // parseTerm parses a single term (variable or parenthesized expression)
-func (p *Parser) parseTerm() (Object, error) {
+func (p *Parser) parseTerm() (Term, error) {
 	p.skipWhitespace()
 
 	if p.pos >= len(p.input) {
@@ -259,7 +259,7 @@ func (p *Parser) peekRune() rune {
 
 // lookupConstant looks up a constant by name and returns its value
 // Supports digit constants (_0, _1, _2, ...) and defined constants
-func lookupConstant(name string) (Object, bool) {
+func lookupConstant(name string) (Term, bool) {
 	// Check for digit constants (_0, _1, _2, ...)
 	if len(name) >= 2 && name[0] == '_' {
 		isDigit := true
@@ -280,7 +280,7 @@ func lookupConstant(name string) (Object, bool) {
 	}
 
 	// Check for defined constants
-	constants := map[string]Object{
+	constants := map[string]Term{
 		"_I":          I,
 		"_K":          K,
 		"_S":          S,

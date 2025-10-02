@@ -385,7 +385,7 @@ func TestMult(t *testing.T) {
 	two := ChurchNumeral(2)
 	three := ChurchNumeral(3)
 
-	var result Object = Application{
+	var result Term = Application{
 		Func: Application{
 			Func: MULT,
 			Arg:  two,
@@ -407,7 +407,7 @@ func TestPow(t *testing.T) {
 	two := ChurchNumeral(2)
 	three := ChurchNumeral(3)
 
-	var result Object = Application{
+	var result Term = Application{
 		Func: Application{
 			Func: POW,
 			Arg:  two,
@@ -429,7 +429,7 @@ func TestFactorial(t *testing.T) {
 	three := ChurchNumeral(3)
 
 	// Apply FACTORIAL to 3
-	var result Object = Application{
+	var result Term = Application{
 		Func: FACTORIAL,
 		Arg:  three,
 	}
@@ -451,7 +451,7 @@ func TestFAC(t *testing.T) {
 	three := ChurchNumeral(3)
 
 	// Apply FAC to 3
-	var result Object = Application{
+	var result Term = Application{
 		Func: FAC,
 		Arg:  three,
 	}
@@ -485,7 +485,7 @@ func TestFIB(t *testing.T) {
 		n := ChurchNumeral(tt.n)
 
 		// Apply FIB to n and SUCC (since FIB returns λf....)
-		var result Object = Application{
+		var result Term = Application{
 			Func: Application{
 				Func: FIB,
 				Arg:  n,
@@ -518,8 +518,8 @@ func TestToBool(t *testing.T) {
 
 func TestAND(t *testing.T) {
 	tests := []struct {
-		a        Object
-		b        Object
+		a        Term
+		b        Term
 		expected bool
 		name     string
 	}{
@@ -530,7 +530,7 @@ func TestAND(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		var result Object = Application{
+		var result Term = Application{
 			Func: Application{
 				Func: AND,
 				Arg:  tt.a,
@@ -549,8 +549,8 @@ func TestAND(t *testing.T) {
 
 func TestOR(t *testing.T) {
 	tests := []struct {
-		a        Object
-		b        Object
+		a        Term
+		b        Term
 		expected bool
 		name     string
 	}{
@@ -561,7 +561,7 @@ func TestOR(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		var result Object = Application{
+		var result Term = Application{
 			Func: Application{
 				Func: OR,
 				Arg:  tt.a,
@@ -580,7 +580,7 @@ func TestOR(t *testing.T) {
 
 func TestNOT(t *testing.T) {
 	// NOT TRUE = FALSE
-	var result Object = Application{
+	var result Term = Application{
 		Func: NOT,
 		Arg:  TRUE,
 	}

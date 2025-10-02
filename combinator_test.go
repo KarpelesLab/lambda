@@ -58,7 +58,7 @@ func TestCombinatorS(t *testing.T) {
 		Arg: K,
 	}
 
-	var result Object = Application{Func: skk, Arg: x}
+	var result Term = Application{Func: skk, Arg: x}
 
 	// Reduce multiple times
 	result, _ = Reduce(result, 10)
@@ -75,7 +75,7 @@ func TestCombinatorB(t *testing.T) {
 	g := Var{Name: "g"}
 	x := Var{Name: "x"}
 
-	var result Object = Application{
+	var result Term = Application{
 		Func: Application{
 			Func: Application{Func: B, Arg: f},
 			Arg:  g,
@@ -98,7 +98,7 @@ func TestCombinatorC(t *testing.T) {
 	x := Var{Name: "x"}
 	y := Var{Name: "y"}
 
-	var result Object = Application{
+	var result Term = Application{
 		Func: Application{
 			Func: Application{Func: C, Arg: f},
 			Arg:  x,
@@ -120,7 +120,7 @@ func TestCombinatorW(t *testing.T) {
 	f := Var{Name: "f"}
 	x := Var{Name: "x"}
 
-	var result Object = Application{
+	var result Term = Application{
 		Func: Application{Func: W, Arg: f},
 		Arg:  x,
 	}
@@ -196,7 +196,7 @@ func TestCombinatorStrings(t *testing.T) {
 	// Test string representations
 	tests := []struct {
 		name     string
-		term     Object
+		term     Term
 		expected string
 	}{
 		{"I", I, "λx.x"},
