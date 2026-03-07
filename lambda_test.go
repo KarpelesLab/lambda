@@ -145,6 +145,7 @@ func TestAlphaConvert(t *testing.T) {
 	}
 
 	// λx.λx.x renamed outer x to y: λy.λx.x
+	// The inner λx shadows the outer x, so the inner binding is unchanged.
 	nested := Abstraction{
 		Param: "x",
 		Body: Abstraction{
@@ -153,8 +154,8 @@ func TestAlphaConvert(t *testing.T) {
 		},
 	}
 	result = nested.AlphaConvert("x", "y")
-	if result.String() != "λy.λy.y" {
-		t.Errorf("Expected 'λy.λy.y', got '%s'", result.String())
+	if result.String() != "λy.λx.x" {
+		t.Errorf("Expected 'λy.λx.x', got '%s'", result.String())
 	}
 }
 

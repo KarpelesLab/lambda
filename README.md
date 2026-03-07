@@ -16,7 +16,7 @@ go get github.com/KarpelesLab/lambda
 
 ## Core Types
 
-The library provides three main types implementing the `lambda.Object` interface:
+The library provides three main types implementing the `lambda.Term` interface:
 
 - **`Var`** - Variables (e.g., `x`, `y`)
 - **`Abstraction`** - Lambda abstractions (e.g., `λx.x`)

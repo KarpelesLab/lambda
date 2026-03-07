@@ -94,16 +94,26 @@ func (a Abstraction) String() string {
 }
 
 func (a Application) String() string {
+	// Unwrap LazyScript to check underlying types for parenthesization
+	funcTerm := Term(a.Func)
+	if ls, ok := funcTerm.(*LazyScript); ok {
+		funcTerm = ls.parse()
+	}
+	argTerm := Term(a.Arg)
+	if ls, ok := argTerm.(*LazyScript); ok {
+		argTerm = ls.parse()
+	}
+
 	// Add parentheses when necessary
 	funcStr := a.Func.String()
-	if _, isAbs := a.Func.(Abstraction); isAbs {
+	if _, isAbs := funcTerm.(Abstraction); isAbs {
 		funcStr = "(" + funcStr + ")"
 	}
 
 	argStr := a.Arg.String()
-	if _, isApp := a.Arg.(Application); isApp {
+	if _, isApp := argTerm.(Application); isApp {
 		argStr = "(" + argStr + ")"
-	} else if _, isAbs := a.Arg.(Abstraction); isAbs {
+	} else if _, isAbs := argTerm.(Abstraction); isAbs {
 		argStr = "(" + argStr + ")"
 	}
 
@@ -145,8 +155,17 @@ func (a Abstraction) Substitute(varName string, replacement Term) Term {
 
 	// Check for variable capture
 	if replacement.FreeVars()[a.Param] {
-		// Need α-conversion to avoid capture
-		newParam := freshVar(a.Param, replacement.FreeVars())
+		// Need α-conversion to avoid capture.
+		// The fresh name must avoid both the replacement's free vars
+		// and the body's free vars to prevent accidental capture.
+		avoid := make(map[string]bool)
+		for k := range replacement.FreeVars() {
+			avoid[k] = true
+		}
+		for k := range a.Body.FreeVars() {
+			avoid[k] = true
+		}
+		newParam := freshVar(a.Param, avoid)
 		newBody := a.Body.AlphaConvert(a.Param, newParam)
 		return Abstraction{Param: newParam, Body: newBody.Substitute(varName, replacement)}
 	}
@@ -171,15 +190,46 @@ func (v Var) AlphaConvert(oldName, newName string) Term {
 
 func (a Abstraction) AlphaConvert(oldName, newName string) Term {
 	if a.Param == oldName {
+		// Rename this binding and free occurrences of oldName in the body,
+		// but stop at inner bindings that shadow oldName.
 		return Abstraction{
 			Param: newName,
-			Body:  a.Body.AlphaConvert(oldName, newName),
+			Body:  alphaRenameBody(a.Body, oldName, newName),
 		}
 	}
 	return Abstraction{
 		Param: a.Param,
 		Body:  a.Body.AlphaConvert(oldName, newName),
 	}
+}
+
+// alphaRenameBody renames free occurrences of oldName to newName,
+// stopping at any binding that shadows oldName.
+func alphaRenameBody(t Term, oldName, newName string) Term {
+	switch term := t.(type) {
+	case Var:
+		if term.Name == oldName {
+			return Var{Name: newName}
+		}
+		return term
+	case Abstraction:
+		if term.Param == oldName {
+			// Inner binding shadows oldName — stop recursing
+			return term
+		}
+		return Abstraction{
+			Param: term.Param,
+			Body:  alphaRenameBody(term.Body, oldName, newName),
+		}
+	case Application:
+		return Application{
+			Func: alphaRenameBody(term.Func, oldName, newName),
+			Arg:  alphaRenameBody(term.Arg, oldName, newName),
+		}
+	case *LazyScript:
+		return alphaRenameBody(term.parse(), oldName, newName)
+	}
+	return t
 }
 
 func (a Application) AlphaConvert(oldName, newName string) Term {
