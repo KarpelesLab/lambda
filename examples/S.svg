@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" width="160" height="140">
+<rect width="160" height="140" fill="#1a1a2e"/>
+<rect id="r0" class="lam" x="10.0" y="17.0" width="140.0" height="6.0" fill="rgb(242,48,48)"/>
+<rect id="r1" class="lam" x="10.0" y="37.0" width="140.0" height="6.0" fill="rgb(48,242,48)"/>
+<rect id="r2" class="lam" x="10.0" y="57.0" width="140.0" height="6.0" fill="rgb(48,48,242)"/>
+<rect id="r3" class="var" x="17.0" y="17.0" width="6.0" height="66.0" fill="rgb(242,48,48)"/>
+<rect id="r4" class="var" x="57.0" y="57.0" width="6.0" height="26.0" fill="rgb(48,48,242)"/>
+<rect id="r5" class="app" x="10.0" y="97.0" width="60.0" height="6.0" fill="rgb(145,48,145)"/>
+<rect id="r6" class="conn" x="17.0" y="77.0" width="6.0" height="26.0" fill="rgb(242,48,48)"/>
+<rect id="r7" class="conn" x="57.0" y="77.0" width="6.0" height="26.0" fill="rgb(48,48,242)"/>
+<rect id="r8" class="var" x="97.0" y="37.0" width="6.0" height="46.0" fill="rgb(48,242,48)"/>
+<rect id="r9" class="var" x="137.0" y="57.0" width="6.0" height="26.0" fill="rgb(48,48,242)"/>
+<rect id="r10" class="app" x="90.0" y="97.0" width="60.0" height="6.0" fill="rgb(48,145,145)"/>
+<rect id="r11" class="conn" x="97.0" y="77.0" width="6.0" height="26.0" fill="rgb(48,242,48)"/>
+<rect id="r12" class="conn" x="137.0" y="77.0" width="6.0" height="26.0" fill="rgb(48,48,242)"/>
+<rect id="r13" class="app" x="10.0" y="117.0" width="100.0" height="6.0" fill="rgb(96,96,145)"/>
+<rect id="r14" class="conn" x="17.0" y="97.0" width="6.0" height="26.0" fill="rgb(145,48,145)"/>
+<rect id="r15" class="conn" x="97.0" y="97.0" width="6.0" height="26.0" fill="rgb(48,145,145)"/>
+</svg>

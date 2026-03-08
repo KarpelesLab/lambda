@@ -8,6 +8,48 @@ This library implements the lambda calculus, a formal system for expressing comp
 
 For an excellent introduction to lambda calculus, watch [What is PLUS times PLUS?](https://www.youtube.com/watch?v=RcVA8Nj6HEo).
 
+## Tromp Diagrams
+
+The library can render lambda terms as [Tromp-style diagrams](https://tromp.github.io/cl/diagrams.html) in both Unicode text and SVG with colors.
+
+| I (identity) `λx.x` | K `λx.λy.x` | S `λx.λy.λz.x z (y z)` |
+|:---:|:---:|:---:|
+| ![I](examples/identity.svg) | ![K](examples/K.svg) | ![S](examples/S.svg) |
+
+| Church 2 `λf.λx.f (f x)` | Church 3 `λf.λx.f (f (f x))` | Y combinator |
+|:---:|:---:|:---:|
+| ![Church 2](examples/church2.svg) | ![Church 3](examples/church3.svg) | ![Y](examples/Y.svg) |
+
+| Omega `(λx.x x) (λx.x x)` |
+|:---:|
+| ![Omega](examples/omega.svg) |
+
+```go
+// Unicode text diagram
+fmt.Println(lambda.Diagram(lambda.Y))
+// ┌─────┬───╴
+// ├─┬─┐ ├─┬─┐
+// │ │ │ │ │ │
+// │ ├─┘ │ ├─┘
+// ├─┘   ├─┘
+// └─────┘
+
+// SVG with custom colors
+svg := lambda.DiagramSVG(lambda.Y, &lambda.SVGOptions{
+    CellSize:   20,
+    Background: "#1a1a2e",
+    Saturation: 0.8,
+})
+
+// Animated SVG showing beta-reduction steps
+anim := lambda.DiagramAnimatedSVG(term, &lambda.AnimationOptions{
+    Loop:         true,
+    StepDuration: 2.0,
+})
+```
+
+To regenerate the example SVGs, run `go test -run TestGenerateExampleSVGs`.
+
 ## Installation
 
 ```bash
