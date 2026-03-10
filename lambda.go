@@ -228,6 +228,13 @@ func alphaRenameBody(t Term, oldName, newName string) Term {
 		}
 	case *LazyScript:
 		return alphaRenameBody(term.parse(), oldName, newName)
+	case Numeral:
+		return term
+	case NumeralApply:
+		if term.Param == oldName {
+			return term
+		}
+		return NumeralApply{N: term.N, Param: term.Param, F: alphaRenameBody(term.F, oldName, newName)}
 	}
 	return t
 }
@@ -286,6 +293,17 @@ func (a Application) BetaReduce() (Term, bool) {
 		// (λx.t) s → t[x := s]
 		result := abs.Body.Substitute(abs.Param, a.Arg)
 		return result, true
+	}
+
+	// Numeral(n) applied to arg → NumeralApply{n, arg} (partial application)
+	if num, ok := funcTerm.(Numeral); ok {
+		param := freshVar("x", a.Arg.FreeVars())
+		return NumeralApply{N: uint64(num), Param: param, F: a.Arg}, true
+	}
+
+	// NumeralApply{n, f} applied to x → f^n(x) in one step
+	if na, ok := funcTerm.(NumeralApply); ok {
+		return na.expand(a.Arg), true
 	}
 
 	// Try to reduce the function
@@ -388,6 +406,10 @@ func ChurchNumeral(n int) Term {
 // ToInt converts a Church numeral to a Go integer by applying it to increment and 0
 // Church numeral n = λf.λx.f^n x, so we apply it to a marker function and count applications
 func ToInt(term Term) int {
+	// Shortcut for compact Numeral type
+	if n, ok := term.(Numeral); ok {
+		return int(n)
+	}
 	// Apply the Church numeral to an increment function and 0
 	// Church numeral n applied to f and 0 will call f n times
 	// We'll use a marker to count

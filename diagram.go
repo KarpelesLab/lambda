@@ -30,6 +30,17 @@ func toDeBruijn(t Term, env []string) dbTerm {
 	if ls, ok := t.(*LazyScript); ok {
 		t = ls.parse()
 	}
+	if num, ok := t.(Numeral); ok {
+		t = num.Expand()
+	}
+	if na, ok := t.(NumeralApply); ok {
+		// Expand to λparam.F^N(param)
+		var body Term = Var{Name: na.Param}
+		for i := uint64(0); i < na.N; i++ {
+			body = Application{Func: na.F, Arg: body}
+		}
+		t = Abstraction{Param: na.Param, Body: body}
+	}
 	switch term := t.(type) {
 	case Var:
 		for i := len(env) - 1; i >= 0; i-- {
